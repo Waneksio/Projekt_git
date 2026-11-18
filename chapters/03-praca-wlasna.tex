@@ -1,0 +1,392 @@
+\chapter{Rozwinięcie}
+\label{ch:rozwiniecie}
+
+W~rozdziale opisano przedmiot i~metodykę badań. Przedstawiono cel badań,
+przebieg eksperymentu, sposób przygotowania danych uczących i~testowych,
+porównywane warianty trasowania oraz miary, według których je oceniano.
+
+% TODO: część dotycząca RL_PCB (rozmieszczanie elementów).
+
+\section{Cel badań}
+\label{sec:cel-badan}
+
+Celem badań jest ocena, czy rozwiązanie Unet-Astar~\cite{Yin2023UnetAstar}
+wytrenowane wyłącznie na syntetycznych, losowo generowanych płytkach może
+skutecznie wspierać trasowanie rzeczywistych projektów PCB. Sformułowano
+następujące pytania badawcze:
+\begin{enumerate}
+  \item Czy predykcja sieci U-Net zmniejsza liczbę węzłów rozwijanych przez
+    algorytm A* na płytkach rzeczywistych, a~więc czy sieć uogólnia się poza
+    rozkład danych uczących?
+  \item Jak jakość trasowania uzyskanego algorytmem Unet-Astar (odsetek
+    połączonych sieci, długość ścieżek, liczba przelotek, liczba naruszeń reguł
+    projektowych) wypada na tle autoroutera wbudowanego w~EasyEDA?
+  \item Czy różnice w~geometrii ścieżek przekładają się na właściwości istotne
+    z~punktu widzenia kompatybilności elektromagnetycznej?
+\end{enumerate}
+
+\section{Przebieg badań}
+\label{sec:przebieg-badan}
+
+Algorytm Unet-Astar nie wyznacza ścieżek samodzielnie --- sieć neuronowa
+jedynie zmienia kolejność rozwijania węzłów przez A*
+(wzór~\ref{eq:unet-astar-f}). Wpływ sieci na jakość trasowania jest więc
+pośredni, a~jej główną zaletą ma być skrócenie wyszukiwania. Z~tego powodu
+porównanie wyłącznie z~autorouterem EasyEDA nie pozwoliłoby rozdzielić wpływu
+sieci od wpływu samego algorytmu A*. W~badaniach porównano zatem trzy warianty
+trasowania:
+\begin{description}
+  \item[EasyEDA] --- wbudowany autorouter EasyEDA (wariant odniesienia);
+  \item[A*] --- algorytm wielowarstwowego A* z~repozytorium Unet-Astar
+    uruchomiony bez sieci neuronowej;
+  \item[Unet-A*] --- ten sam algorytm wspomagany predykcją sieci U-Net.
+\end{description}
+
+Badania przebiegały w~następujących krokach:
+\begin{enumerate}
+  \item Wygenerowanie zbioru uczącego z~losowych płytek
+    (sekcja~\ref{sec:zbior-uczacy}).
+  \item Trening sieci U-Net (sekcja~\ref{sec:trening}).
+  \item Przygotowanie płytek testowych w~EasyEDA: projektów własnych oraz
+    zaimportowanych projektów gotowych (sekcja~\ref{sec:zbior-testowy}).
+  \item Trasowanie każdej płytki testowej autorouterem EasyEDA i~eksport
+    pliku autoroutera w~formacie \emph{Specctra DSN}.
+  \item Trasowanie tej samej płytki na podstawie pliku DSN w~wariantach A*
+    i~Unet-A*.
+  \item Import wyniku (plik \emph{Specctra SES}) z~powrotem do EasyEDA,
+    weryfikacja DRC i~odczyt statystyk projektu.
+  \item Zestawienie miar (sekcja~\ref{sec:miary}) dla wszystkich płytek
+    testowych i~wariantów.
+\end{enumerate}
+
+Wszystkie warianty otrzymują identyczne dane wejściowe: obrys płytki, rozmieszczenie
+elementów, sieci oraz reguły projektowe zapisane w~tym samym pliku DSN.
+
+\section{Środowisko badawcze}
+\label{sec:srodowisko}
+
+\begin{table}[ht]
+\fcmtcaption{Środowisko badawcze. Źródło: opracowanie własne.}\label{tab:srodowisko}
+\centering\footnotesize%
+\begin{tabular}{p{0.3\textwidth} p{0.6\textwidth}}
+\toprule
+Element & Wersja / parametry \\
+\midrule
+System operacyjny & Windows 11 Home \\
+\midrule
+Procesor & Intel Core i5-8400, 2,8~GHz, 6~rdzeni / 6~wątków \\
+\midrule
+Pamięć RAM & 24~GB, 2133~MT/s \\
+\midrule
+Karta graficzna & NVIDIA GeForce GTX 1060, 3~GB \\
+\midrule
+Python & 3.8.10 \\
+\midrule
+PyTorch & 2.4.1 (CUDA 12.1) \\
+\midrule
+EasyEDA & Standard, wersja 6.5.61 \\
+\midrule
+Unet-Astar & repozytorium~\cite{Firesuiry_UnetAstar_GitHub} wraz
+  z~modyfikacjami opisanymi w~sekcji~\ref{sec:modyfikacje} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Format danych i~współpraca z~EasyEDA}
+\label{sec:format-danych}
+
+Wymiana danych z~EasyEDA odbywa się za pośrednictwem plików autoroutera
+w~formacie \emph{Specctra}. Plik DSN zawiera obrys płytki, definicje warstw,
+reguły projektowe (odstęp izolacyjny, szerokość ścieżki, przelotki), kształty
+padów (\emph{padstack}), położenia pinów oraz listę sieci. EasyEDA zapisuje
+płytkę jako jeden komponent, którego piny mają współrzędne bezwzględne.
+Obroty elementów są uwzględnione bezpośrednio w~kształtach padów.
+Współrzędne zapisane są w~jednostkach EasyEDA równych 10~mil.
+
+Program Unet-Astar przelicza współrzędne na mile i~na potrzeby trasowania
+przenosi je na siatkę o~boku 8~mil (ok.~0{,}2~mm). Reguły projektowe są przy
+tym zaokrąglane w~górę do całkowitej liczby oczek siatki.
+
+Oryginalny program Unet-Astar nie zapisuje wyniku w~formacie, który można
+wczytać z~powrotem do EasyEDA. Wymiana danych przebiega więc w~dwóch
+kierunkach: z~EasyEDA eksportowany jest plik DSN, będący danymi wejściowymi
+programu Unet-Astar, a~wynik trasowania wraca do EasyEDA jako plik sesji
+\emph{Specctra SES} importowany do projektu.
+Plik SES generowany jest przez eksporter przygotowany na potrzeby badań.
+Eksporter odwzorowuje kolejne punkty ścieżki z~siatki
+z~powrotem na współrzędne płytki, zmianę warstwy zapisuje jako przelotkę,
+a~ścieżki podsieci powstałych z~podziału sieci wielopinowych łączy pod
+wspólną nazwą sieci z~pliku DSN. Szerokość ścieżki i~średnicę przelotki
+przyjmuje się z~reguł zapisanych w~pliku DSN, bez zaokrąglenia do siatki.
+Ponieważ siatka o~boku 8~mil nie pokrywa się ze środkami padów, końce
+ścieżek dociągane są krótkim odcinkiem do środka padu. Odcinek ten
+może naruszać reguły odstępów, dlatego zaimportowana płytka jest
+sprawdzana narzędziem DRC programu EasyEDA.
+
+\section{Zbiór uczący}
+\label{sec:zbior-uczacy}
+
+Sieć trenowano wyłącznie na płytkach syntetycznych, generowanych losowo zgodnie
+z~procedurą z~repozytorium Unet-Astar. Parametry generatora zestawiono
+w~tabeli~\ref{tab:generator}.
+
+\begin{table}[ht]
+\fcmtcaption{Parametry generatora losowych płytek. Źródło: opracowanie własne
+na podstawie kodu źródłowego~\cite{Firesuiry_UnetAstar_GitHub}.}\label{tab:generator}
+\centering\footnotesize%
+\begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+\toprule
+Parametr & Wartość \\
+\midrule
+Liczba płytek & 1250 \\
+\midrule
+Wymiary płytki & losowo 1000--2000~mil (25{,}4--50{,}8~mm) w~każdej osi \\
+\midrule
+Liczba warstw & 2 \\
+\midrule
+Gęstość pinów & 0{,}15 pinu na pole $100 \times 100$~mil \\
+\midrule
+Gęstość przeszkód & 0{,}1 przeszkody na pole $300 \times 300$~mil \\
+\midrule
+Kształty padów & koło o~średnicy 80~mil lub prostokąt $56 \times 48$~mil \\
+\midrule
+Przeszkody & koło o~średnicy 240~mil, bez przypisanej sieci \\
+\midrule
+Minimalne odległości & pin--pin 100~mil, pin--przeszkoda 300~mil,
+  przeszkoda--przeszkoda 500~mil \\
+  \midrule
+Sieci & wyłącznie dwupinowe, piny przydzielane losowo \\
+\midrule
+Siatka trasowania & 8~mil \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Górną granicę wymiarów płytki dobrano tak, aby płytka mieściła się w~wejściu
+sieci o~rozmiarze $256 \times 256$ oczek siatki (2048~mil). W~oryginalnym
+repozytorium generowano płytki do 5000~mil, jednak próbki większe od wejścia
+sieci są odrzucane przez moduł wczytujący dane.
+
+Każda wygenerowana płytka jest najpierw w~całości trasowana algorytmem A*.
+Sieci są prowadzone kolejno, od najkrótszej. Następnie dla każdego połączenia
+(z~pominięciem 30\% najkrótszych) tworzona jest próbka ucząca:
+\begin{description}
+  \item[Wejście] --- obraz o~trzech kanałach. Kanał pierwszy zawiera punkt
+    początkowy i~końcowy połączenia rozmyte filtrem Gaussa o~odchyleniu
+    standardowym równym 30\% odległości między nimi. Kanały drugi i~trzeci
+    zawierają mapy przeszkód na obu warstwach: pady innych sieci oraz
+    pozostałe, już poprowadzone ścieżki.
+  \item[Etykieta] --- dwukanałowa maska obszaru rekomendowanego,
+    wyznaczona dwukierunkowym algorytmem Lee (sekcja~\ref{sec:lee}).
+\end{description}
+
+Algorytm Lee służy wyłącznie do przygotowania etykiet. Wyznacza obszar
+rekomendowany dokładnie, ale przeszukuje przy tym całą dostępną część
+płytki, więc nie przyspieszyłby trasowania. Sieć uczy się odtwarzać jego
+wynik: kosztowne obliczenia wykonywane są jednokrotnie, podczas generowania
+zbioru uczącego, a~w~trakcie trasowania zastępuje je pojedyncza predykcja
+sieci. Jakość obszarów wyznaczonych przez algorytm Lee stanowi zatem górną
+granicę tego, czego sieć może się nauczyć.
+
+Implementacja w~repozytorium różni się od opisu w~artykule
+(wzór~\ref{eq:lee-obszar}). Do obszaru rekomendowanego należą oczka
+spełniające warunek $d_s(n) + d_t(n) \le L^* + 0{,}1\,d_M(s,t) + 1$, gdzie
+$d_M$ oznacza odległość w~metryce miejskiej zamiast euklidesowej, a~stały
+składnik $+1$ poszerza obszar o~jedno oczko zapasu. W~badaniach
+wykorzystano etykiety wyznaczone zgodnie z~implementacją.
+
+Uzyskano 13\,830 próbek. Zbiór podzielono losowo w~proporcji
+90:10 na część uczącą i~walidacyjną.
+
+\section{Model i~trening}
+\label{sec:trening}
+
+Repozytorium zawiera trzy architektury: klasyczny U-Net (31~mln parametrów),
+U-Net++ (47~mln) oraz głęboką sieć \emph{ResNetUNet} zaproponowaną przez
+autorów rozwiązania (170~mln parametrów, 8~poziomów redukcji rozdzielczości).
+Próba treningu modelu \emph{ResNetUNet} na dostępnej karcie graficznej
+z~3~GB pamięci wykazała, że już przy dwóch próbkach w~paczce zapotrzebowanie
+na pamięć przekracza jej pojemność. Trening trwał wówczas ponad 4~s na
+paczkę. Z~tego powodu w~badaniach wykorzystano klasyczny U-Net, który przy
+czterech próbkach w~paczce zajmuje ok.~2~GB pamięci.
+% TODO: Google Colab -- dopisać.
+
+\begin{table}[ht]
+\fcmtcaption{Parametry treningu. Źródło: opracowanie własne.}\label{tab:trening}
+\centering\footnotesize%
+\begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+\toprule
+Parametr & Wartość \\
+\midrule
+Architektura & U-Net, wejście $3 \times 256 \times 256$, wyjście
+  $2 \times 256 \times 256$ \\
+  \midrule
+Funkcja straty & $0{,}5 \cdot \mathrm{BCE} + 0{,}5 \cdot \mathrm{Dice}$ \\
+\midrule
+Optymalizator & Adam, współczynnik uczenia $10^{-4}$ \\
+\midrule
+Harmonogram & mnożenie współczynnika uczenia przez 0{,}75 po każdej epoce \\
+\midrule
+Liczba epok & 15 \\
+\midrule
+Rozmiar paczki & 4 \\
+\midrule
+Wybór modelu & najmniejsza strata na zbiorze walidacyjnym \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+W~trakcie trasowania sieć wywoływana jest dla każdego połączenia
+z~wyjątkiem 30\% najkrótszych. Dla płytek większych od wejścia sieci
+z~mapy przeszkód wycinany jest fragment $256 \times 256$ oczek
+wyśrodkowany między punktami połączenia. Połączenia, których rozpiętość
+w~którejkolwiek osi przekracza 256 oczek, prowadzone są bez udziału sieci.
+Wynik sieci $s(n)$ modyfikuje funkcję oceny węzła zgodnie ze
+wzorem~\ref{eq:unet-astar-f}, z~parametrami $a = 800$ i~$b = 0$,
+przyjętymi za eksperymentami autorów.
+
+\section{Zbiór testowy}
+\label{sec:zbior-testowy}
+
+Zbiór testowy obejmuje wyłącznie płytki rzeczywiste, niewykorzystane
+w~treningu:
+\begin{itemize}
+  \item płytki zaprojektowane samodzielnie w~EasyEDA,
+  \item gotowe projekty udostępnione publicznie w~serwisie EasyEDA ---
+    projekt przykładowy \emph{Project-Sample} z~sekcji
+    \emph{Modules}~\cite{EasyEDA_ProjectSample}.
+\end{itemize}
+
+Z~zaimportowanych projektów przed trasowaniem usuwane są ścieżki
+i~przelotki poprowadzone przez ich autorów, tak aby wszystkie warianty
+trasowały płytkę od początku. Ścieżki zapisane w~pliku DSN (sekcja
+\emph{wiring}) są przez program Unet-Astar pomijane.
+Ze względu na ograniczenia rozwiązania płytki testowe muszą spełniać
+następujące warunki:
+\begin{itemize}
+  \item dwie warstwy miedzi --- sieć przyjmuje mapy przeszkód dokładnie
+    dwóch warstw;
+  \item obrys prostokątny --- program uwzględnia wyłącznie prostokąt
+    opisany na obrysie płytki;
+  \item brak obszarów zabronionych i~stref miedzi --- nie są one
+    odczytywane z~pliku DSN.
+\end{itemize}
+Płytki większe niż $2048 \times 2048$~mil mogą być trasowane, ale miary
+jakości predykcji (sekcja~\ref{sec:miary}) wyznaczane są wyłącznie dla
+płytek mieszczących się w~wejściu sieci.
+
+Rozkład danych testowych istotnie różni się od rozkładu danych uczących.
+Płytki rzeczywiste zawierają sieci wielopinowe, które program dzieli na
+połączenia dwupinowe. Mają też gęsto rozmieszczone pady elementów SMD
+o~różnych kształtach i~nierównomierne zagęszczenie połączeń. Badanie
+ma zatem charakter oceny zdolności uogólniania modelu.
+
+\section{Miary oceny}
+\label{sec:miary}
+
+Miary zestawiono w~tabeli~\ref{tab:miary}. Miary jakości trasowania
+odczytywane są w~EasyEDA po zaimportowaniu wyniku, dzięki czemu wszystkie
+warianty oceniane są tym samym narzędziem. Miary wydajności wyszukiwania
+dotyczą wyłącznie wariantów A* i~Unet-A*.
+
+\begin{table}[ht]
+\fcmtcaption{Miary oceny. Źródło: opracowanie własne.}\label{tab:miary}
+\centering\footnotesize%
+\begin{tabular}{p{0.28\textwidth} p{0.42\textwidth} p{0.2\textwidth}}
+\toprule
+Miara & Opis & Warianty \\
+\midrule
+\multicolumn{3}{l}{\emph{Jakość trasowania}} \\
+\midrule
+Odsetek połączeń & udział poprowadzonych połączeń w~liczbie wszystkich
+  połączeń & wszystkie \\
+  \midrule
+Długość ścieżek & łączna długość ścieżek na obu warstwach & wszystkie \\
+\midrule
+Liczba przelotek & --- & wszystkie \\
+\midrule
+Naruszenia DRC & liczba błędów zgłoszonych przez DRC EasyEDA, w~podziale
+  na typy & wszystkie \\
+  \midrule
+Czas trasowania & czas od wczytania płytki do zakończenia trasowania
+  & wszystkie \\
+\midrule
+\multicolumn{3}{l}{\emph{Wydajność wyszukiwania}} \\
+\midrule
+Rozwinięte węzły & liczba węzłów rozwiniętych przez A*; miara niezależna
+  od implementacji i~sprzętu & A*, Unet-A* \\
+  \midrule
+Redukcja węzłów & $1 - N_{\mathrm{U}} / N_{\mathrm{A}}$, gdzie
+  $N_{\mathrm{U}}$ i~$N_{\mathrm{A}}$ to liczby węzłów rozwiniętych przez
+  Unet-A* i~A*; liczona dla połączeń, w~których użyto sieci & Unet-A* \\
+\midrule
+\multicolumn{3}{l}{\emph{Jakość predykcji}} \\
+\midrule
+Dice, IoU & zgodność maski przewidzianej przez sieć (próg 0{,}5)
+  z~etykietą wyznaczoną algorytmem Lee & Unet-A* \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Wyniki dla każdej płytki testowej zapisywane są w~osobnym pliku, a~następnie
+agregowane dla całego zbioru testowego.
+
+\section{Ocena kompatybilności elektromagnetycznej}
+\label{sec:emc}
+
+% EMI jeśli się uda
+Środowisko EasyEDA nie udostępnia symulacji pola elektromagnetycznego płytki.
+Bezpośrednia ocena emisji zakłóceń wymagałaby zewnętrznego symulatora pola
+albo pomiarów fizycznych wykonanych płytek. Z~tego powodu w~badaniach
+zastosowano miary pośrednie, wyznaczane z~geometrii ścieżek. Są one zgodne
+z~powszechnie stosowanymi zaleceniami projektowania pod kątem EMC:
+\begin{itemize}
+  \item łączna długość ścieżek --- dłuższe ścieżki skuteczniej promieniują
+    i~odbierają zakłócenia;
+  \item liczba przelotek --- każda przelotka stanowi nieciągłość impedancji;
+  \item długość równoległego prowadzenia ścieżek różnych sieci w~odległości
+    mniejszej niż zadany próg --- miara podatności na przesłuch;
+  \item pole pętli tworzonej przez ścieżkę sygnałową i~ścieżkę powrotną
+    masy --- miara emisji promieniowanej.
+\end{itemize}
+% openEMS; uzupełnić bibliografię o źródło zaleceń EMC.
+
+\section{Modyfikacje kodu źródłowego}
+\label{sec:modyfikacje}
+
+Kod repozytorium Unet-Astar w~udostępnionej postaci nie umożliwiał
+przeprowadzenia badań bez zmian. Wprowadzono następujące modyfikacje:
+\begin{itemize}
+  \item poprawiono wyznaczanie punktu początkowego i~końcowego próbki uczącej
+    dla płytek wczytanych z~pliku DSN --- wykorzystywano współrzędne
+    nieprzesunięte do początku układu, co dla płytek z~EasyEDA dawało
+    ujemne indeksy;
+  \item ujednolicono wartość zwracaną przez algorytm A* w~przypadku
+    braku ścieżki --- wcześniej powodowała ona przerwanie przetwarzania
+    całej płytki;
+  \item poprawiono błąd indeksowania sieci w~module wizualizacji, który
+    uniemożliwiał trasowanie płytek z~sieciami wielopinowymi;
+  \item dodano zapis obiektu płytki wczytanej z~pliku DSN;
+  \item dodano skrypty: generowania próbek z~losowych płytek i~z~plików DSN,
+    treningu oraz testowania na płytkach z~EasyEDA;
+  \item dodano zapis wyników trasowania do plików graficznych i~JSON;
+  \item dodano eksport wyniku trasowania do pliku Specctra SES
+    importowanego przez EasyEDA.
+\end{itemize}
+
+\section{Ograniczenia}
+\label{sec:ograniczenia}
+
+\begin{itemize}
+  \item Trasowanie odbywa się na siatce 8~mil, a~reguły projektowe są
+    zaokrąglane w~górę do jej wielokrotności. Skutkuje to większymi
+    odstępami niż wymagane i~może uniemożliwić poprowadzenie ścieżek
+    na gęstych płytkach.
+  \item Program stosuje jedną szerokość ścieżki i~jeden odstęp dla całej
+    płytki --- klasy sieci nie są obsługiwane (tabela~\ref{tab:reguly-ai}).
+  \item Ze względu na pojemność pamięci karty graficznej nie wytrenowano
+    modelu \emph{ResNetUNet} zaproponowanego przez autorów rozwiązania.
+  \item Czasy działania zmierzone dla implementacji w~języku Python nie są
+    porównywalne z~czasem działania autoroutera EasyEDA. Dlatego jako
+    podstawową miarę wydajności przyjęto liczbę rozwiniętych węzłów.
+\end{itemize}

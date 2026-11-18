@@ -1,0 +1,89 @@
+\begin{thebibliography}{10}
+
+\bibitem{EasyEDA_ProjectSample}
+{EasyEDA}.
+\newblock Project-sample.
+\newblock Projekt przykładowy w~sekcji Modules serwisu EasyEDA.
+\newblock
+  \url{https://easyeda.com/modules/Project-Sample_56459a8511bd466d96460b5ac0479113}.
+
+\bibitem{ECSS_Q_ST_70_12C_Rev1}
+{European Cooperation for Space Standardization}.
+\newblock {ECSS-Q-ST-70-12C Rev.1}: {Space product assurance -- Design rules
+  for printed circuit boards}.
+\newblock ESA Requirements and Standards Section, Noordwijk,
+  \url{https://escies.org/download/webDocumentFile?id=70975}, April 2025.
+
+\bibitem{Firesuiry_UnetAstar_GitHub}
+Firesuiry.
+\newblock {Unet-Astar-For-PCB-Routing}: repozytorium kodu źródłowego.
+\newblock GitHub,
+  \url{https://github.com/Firesuiry/Unet-Astar-For-PCB-Routing}.
+
+\bibitem{Lee1961}
+C.~Y. Lee.
+\newblock An algorithm for path connections and its applications.
+\newblock {\em IRE Transactions on Electronic Computers}, EC-10(3):346--365,
+  1961.
+
+\bibitem{Lin2021UnifiedPCB}
+Ting-Chou Lin, Devon~J. Merrill, Yen-Yi Wu, Chester Holtz, and Chung-Kuan
+  Cheng.
+\newblock A unified printed circuit board routing algorithm with complicated
+  constraints and differential pairs.
+\newblock In {\em Proceedings of the 26th Asia and South Pacific Design
+  Automation Conference (ASP-DAC)}, pages 170--175, 2021.
+
+\bibitem{OShea2015CNN}
+Keiron O'Shea and Ryan Nash.
+\newblock An introduction to convolutional neural networks.
+\newblock arXiv:1511.08458, \url{https://arxiv.org/abs/1511.08458}, 2015.
+
+\bibitem{KiCad_PCBEditor_BasicConcepts}
+{The KiCad Documentation Contributors}.
+\newblock {PCB Editor}, sekcja {Basic PCB concepts}.
+\newblock KiCad 9.0,
+  \url{https://docs.kicad.org/9.0/en/pcbnew/pcbnew.html#basic_pcb_concepts}.
+
+\bibitem{KiCad_PCBEditor_DRC}
+{The KiCad Documentation Contributors}.
+\newblock {PCB Editor}, sekcje {Board setup}, {Design rules checking}, {Custom
+  design rules}.
+\newblock KiCad 9.0,
+  \url{https://docs.kicad.org/9.0/en/pcbnew/pcbnew.html#design-rule-checking}.
+
+\bibitem{Vassallo_RLPCB_GitHub}
+Luke Vassallo.
+\newblock {RL\_PCB}: repozytorium kodu źródłowego.
+\newblock GitHub, \url{https://github.com/LukeVassallo/RL_PCB}.
+
+\bibitem{Vassallo2024RLPCB}
+Luke Vassallo and Josef Bajada.
+\newblock Learning circuit placement techniques through reinforcement learning
+  with adaptive rewards.
+\newblock In {\em 2024 Design, Automation \& Test in Europe Conference \&
+  Exhibition (DATE)}, pages 1--6, Valencia, Spain, 2024. IEEE.
+\newblock \url{https://ieeexplore.ieee.org/document/10546526}.
+
+\bibitem{Yin2023UnetAstar}
+Shiyuan Yin, Min Jin, Gang Chen, Guoliang Gong, Wenyu Mao, and Huaxiang Lu.
+\newblock {Unet-Astar}: A deep learning-based fast routing algorithm for
+  unified {PCB} routing.
+\newblock {\em IEEE Access}, 11:113712--113725, 2023.
+\newblock \url{https://ieeexplore.ieee.org/document/10274949}.
+
+\bibitem{Zhou_EECS357_Lee}
+Hai Zhou.
+\newblock Maze router: {Lee} algorithm --- materiały do wykładu {EECS} 357
+  {Introduction to VLSI CAD}.
+\newblock Northwestern University,
+  \url{https://users.eecs.northwestern.edu/~haizhou/357/lec6.pdf}.
+
+\bibitem{Romik_TSPCB_ObwodDrukowany}
+Łukasz Romik.
+\newblock Obwód drukowany ({PCB}, ang. {Printed Circuit Board}) -- co to jest
+  i jakie ma zastosowanie w elektronice?
+\newblock TS PCB,
+  \url{https://tspcb.pl/centrum-wiedzy/kompendium-pcb/technologia/obwod-drukowany-pcb-ang-printed-circuit-board-co-to-jest-i-jakie-ma-zastosowanie-w-elektronice/}.
+
+\end{thebibliography}

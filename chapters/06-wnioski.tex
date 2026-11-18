@@ -1,0 +1,53 @@
+\chapter{Wnioski}
+\label{ch:wnioski}
+
+\section{Skuteczność trasowania}
+
+Dla większości płytek rozwiązania wyznaczone algorytmami \emph{A*}
+i~\emph{Unet-Astar} były gorsze od wyników autoroutera dostępnego w~edytorze
+\emph{EasyEDA}. Ze względu na postać funkcji celu bazowa wersja algorytmu
+\emph{A*} umieszczała na płytce wiele przelotek. Wersja wspomagana siecią
+neuronową w~dużej mierze wyeliminowała ten problem. Ze względu na sposób
+modelowania problemu nadal jednak proponowała ścieżki z~wieloma
+załamaniami, co zwiększało ich łączną długość. Widoczne są też skutki
+zaokrąglania reguł projektowych do oczek siatki. W~niektórych miejscach
+algorytm \emph{A*} nie był w~stanie poprowadzić ścieżki, podczas gdy
+wbudowany autorouter radził sobie z~tym bez trudu.
+
+Badania wykazały jednak, że zdarzają się przypadki, w~których autorouter
+nie poprowadził wszystkich połączeń, a~algorytm \emph{A*} --- zarówno
+w~wersji podstawowej, jak i~z~obszarami rekomendowanymi wyznaczanymi przez
+sieć konwolucyjną --- poprowadził je w~całości.
+
+\section{Czas trasowania}
+
+Przeprowadzony eksperyment wykazał, że wyznaczanie obszarów rekomendowanych
+przez konwolucyjną sieć neuronową znacznie przyspiesza trasowanie
+w~porównaniu z~samym algorytmem \emph{A*}. \emph{EasyEDA} nie podaje
+wprost czasu trasowania, jednak jest on rzędu kilku sekund, a~więc zbliżony
+do czasu działania \emph{Unet-Astar}. Czasów tych nie można jednak
+bezpośrednio porównać, ponieważ edytor działający w~przeglądarce wykonuje
+obliczenia w~chmurze.
+
+\section{Kierunki dalszych prac w~zakresie trasowania}
+
+W~obecnej implementacji \emph{Unet-Astar} nie stanowi jeszcze
+pełnowartościowej alternatywy dla autoroutera \emph{EasyEDA}. Uzyskane
+wyniki wskazują jednak, że rozwiązania oparte na sztucznej inteligencji mają
+potencjał, by w~przyszłości dorównać klasycznym metodom heurystycznym,
+a~nawet je wyprzedzić.
+
+Przewidywanie obszarów rekomendowanych przez sieć konwolucyjną okazało się
+korzystne nie tylko pod względem czasu działania, lecz także jakości
+wyników. Naturalnym rozwinięciem tej metody byłoby wykorzystanie jako
+danych uczących ścieżek wyznaczonych algorytmem \emph{A*} zamiast obszarów
+wyznaczanych algorytmem Lee.
+
+Dalszego rozwoju wymaga również implementacja algorytmu \emph{A*}
+wykorzystana w~programie. Należy przede wszystkim zmodyfikować funkcję celu
+i~systematycznie zbadać wpływ parametrów na wynik algorytmu. Szczególną
+uwagę warto zwrócić na zwiększenie kary za nieregularny kształt ścieżki.
+
+% Wygodny format eksportu danych z~narzędzia bardzo ułatwia integrację z~różnymi solverami.
+% Dobrym kierunkiem ułatwiającym dalsze prace byłaby automatyzacja importu.
+% TODO: podsumowanie i interpretacja wyników, odniesienie do celu pracy, kierunki dalszych prac.

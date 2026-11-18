@@ -1,0 +1,230 @@
+\chapter{Badania}
+\label{ch:badania}
+
+W~rozdziale opisano przebieg eksperymentu przeprowadzonego zgodnie
+z~metodyką przedstawioną w~rozdziale~\ref{ch:rozwiniecie}. Kolejne etapy,
+wykorzystywane w~nich narzędzia oraz ich wyniki zestawiono
+w~tabeli~\ref{tab:etapy}. Uzyskane wyniki omówiono
+w~rozdziale~\ref{ch:wyniki}.
+
+\begin{table}[ht]
+\fcmtcaption{Etapy eksperymentu. Źródło: opracowanie własne.}\label{tab:etapy}
+\centering\footnotesize%
+\begin{tabular}{p{0.04\textwidth} p{0.33\textwidth} p{0.2\textwidth} p{0.3\textwidth}}
+\toprule
+Lp. & Etap & Narzędzie & Wynik \\
+\midrule
+1 & Generowanie zbioru uczącego i~trening sieci & Unet-Astar & wagi modelu U-Net \\
+\midrule
+2 & Utworzenie płytek testowych na podstawie schematów & EasyEDA & projekty PCB \\
+\midrule
+3 & Trasowanie płytek autorouterem & EasyEDA & wariant \emph{EasyEDA} \\
+\midrule
+4 & Eksport płytek do formatu Specctra & EasyEDA & pliki DSN \\
+\midrule
+5 & Trasowanie na podstawie plików DSN & Unet-Astar & ścieżki wariantów
+  \emph{A*} i~\emph{Unet-A*}, statystyki wyszukiwania \\
+  \midrule
+6 & Eksport ścieżek & eksporter SES & pliki SES \\
+\midrule
+7 & Sklonowanie płytek i~naniesienie wyników & EasyEDA & płytki wariantów
+  \emph{A*} i~\emph{Unet-A*} \\
+  \midrule
+8 & Odczyt parametrów płytek & EasyEDA & miary jakości trasowania \\
+\midrule
+9 & Zestawienie wyników & arkusz / skrypt & tabele porównawcze \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Przygotowanie sieci neuronowej}
+\label{sec:exp-trening}
+
+Zbiór uczący wygenerowano zgodnie z~opisem w~sekcji~\ref{sec:zbior-uczacy}.
+Utworzono 1250~losowych płytek dwuwarstwowych o~bokach od 1000 do
+2000~mil. Generowanie prowadzono równolegle w~pięciu procesach.
+Z~płytek uzyskano łącznie 13830~próbek (średnio ok.~11 na płytkę),
+zajmujących na dysku 3,1~GB. Zbiór podzielono losowo w~proporcji 9:1 na
+część uczącą i~walidacyjną.
+
+Sieć U-Net trenowano z~parametrami podanymi w~tabeli~\ref{tab:trening}.
+Do dalszych badań wybrano model o~najmniejszej stracie na zbiorze
+walidacyjnym. Trening na karcie graficznej trwał łącznie 13~h 27~min
+(15~epok, średnio ok.~54~min na epokę). Strata walidacyjna malała niemal
+w~każdej epoce, z~0,155 po pierwszej do 0,098 po ostatniej. Najmniejszą
+stratę walidacyjną (0,0978, w~tym BCE 0,0486 i~strata Dice 0,1471)
+osiągnięto w~ostatniej, 15.~epoce. Oznacza to, że dłuższy trening mógłby
+jeszcze nieznacznie poprawić model.
+Przebieg funkcji straty przedstawiono w~rozdziale~\ref{ch:wyniki}.
+
+\section{Przygotowanie płytek testowych}
+\label{sec:exp-plytki}
+
+Płytki testowe utworzono w~EasyEDA na podstawie dwóch rodzajów schematów:
+\begin{itemize}
+  \item schematów własnych,
+  \item schematu publicznego projektu przykładowego \emph{Project-Sample},
+    udostępnionego w~sekcji \emph{Modules} serwisu
+    EasyEDA~\cite{EasyEDA_ProjectSample}.
+\end{itemize}
+
+Dla każdego schematu wygenerowano w~EasyEDA płytkę PCB, na której
+umieszczono footprinty elementów wraz z~siecią połączeń. Następnie
+wyznaczono prostokątny obrys płytki i~rozmieszczono elementy
+ręcznie. Rozmieszczenie elementów nie było zmieniane w~dalszych etapach, 
+dlatego wszystkie warianty trasowania otrzymują identyczne położenia padów. 
+Płytki spełniają wymagania podane w~sekcji~\ref{sec:zbior-testowy}:
+mają dwie warstwy miedzi, prostokątny obrys i~nie zawierają 
+stref miedzi ani obszarów zabronionych.
+
+Dla wszystkich płytek i~wszystkich sieci zastosowano ten sam zestaw reguł
+projektowych (tabela~\ref{tab:reguly}). Reguły te zapisywane są w~pliku DSN
+i~obowiązują wszystkie trzy warianty trasowania. W~programie Unet-Astar są
+one zaokrąglane w~górę do całkowitej liczby oczek siatki
+(sekcja~\ref{sec:format-danych}).
+
+\begin{table}[ht]
+\fcmtcaption{Reguły projektowe płytek testowych. Źródło: opracowanie własne.}\label{tab:reguly}
+\centering\footnotesize%
+\begin{tabular}{l r r}
+\toprule
+Reguła (wartość minimalna) & [mm] & [mil] \\
+\midrule
+Szerokość ścieżki & 0{,}254 & 10 \\
+\midrule
+Odstęp izolacyjny (\emph{clearance}) & 0{,}152 & 6 \\
+\midrule
+Średnica przelotki & 0{,}610 & 24 \\
+\midrule
+Średnica otworu przelotki & 0{,}305 & 12 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Charakterystykę płytek testowych zestawiono w~tabeli~\ref{tab:plytki-testowe}.
+
+\begin{table}[ht]
+\fcmtcaption{Płytki testowe. Źródło: opracowanie własne.}\label{tab:plytki-testowe}
+\centering\footnotesize%
+\begin{tabular}{l l r r r r}
+\toprule
+Płytka & Pochodzenie & Wymiary [mm] & Elementy & Sieci & Połączenia \\
+\midrule
+Płytka z~diodą LED & własna & $51 \times 34$ & 4 & 4 & 4 \\
+\midrule
+Płytka przykładowa & publiczna & $37 \times 25$ & 8 & 6 & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Kolumna \emph{Połączenia} podaje liczbę połączeń dwupinowych, na które
+program Unet-Astar dzieli sieci wielopinowe. Odpowiada ona liczbie
+zadań wyszukiwania ścieżki wykonywanych przez algorytm A*. Na płytce
+przykładowej jedna z~sześciu sieci ma tylko jeden pin, więc nie wymaga
+poprowadzenia. Pozostałe pięć sieci, w~tym ośmiopinowa sieć zasilania
++24~V, daje łącznie 16~połączeń.
+
+\section{Trasowanie autorouterem EasyEDA}
+\label{sec:exp-autorouter}
+
+Każdą płytkę testową poprowadzono autorouterem wbudowanym w~EasyEDA
+(EasyEDA Standard 6.5.61, tabela~\ref{tab:srodowisko}). Reguły trasowania
+autoroutera (\emph{Routing Rules}) odwołują się do reguł projektowych
+(\emph{Design Rules}) zdefiniowanych dla projektu. Autorouter korzystał
+więc z~tych samych wartości szerokości ścieżki, odstępu izolacyjnego
+i~wymiarów przelotki, które podano w~tabeli~\ref{tab:reguly}.
+Poprowadzona płytka stanowi wariant odniesienia \emph{EasyEDA}.
+Dla każdej płytki zanotowano, czy autorouter poprowadził wszystkie
+połączenia. EasyEDA nie podaje czasu działania autoroutera, dlatego czasu
+trasowania tego wariantu nie mierzono.
+
+\section{Eksport plików DSN}
+\label{sec:exp-dsn}
+
+Płytki wyeksportowano z~EasyEDA do plików w~formacie \emph{Specctra DSN}
+(sekcja~\ref{sec:format-danych}). Plik zawiera obrys płytki, warstwy,
+reguły projektowe, kształty padów, położenia pinów i~listę sieci. Zawiera
+również ścieżki poprowadzone przez autorouter (sekcja \emph{wiring}). Program
+Unet-Astar pomija tę sekcję, więc warianty \emph{A*} i~\emph{Unet-A*}
+trasują płytkę od początku, a~wynik autoroutera nie wpływa na ich działanie.
+
+\section{Trasowanie programem Unet-Astar}
+\label{sec:exp-unet-astar}
+
+Na podstawie każdego pliku DSN płytkę poprowadzono w~dwóch wariantach:
+\begin{description}
+  \item[A*] --- algorytm wielowarstwowego A* bez udziału sieci,
+  \item[Unet-A*] --- ten sam algorytm wspomagany predykcją wytrenowanej
+    sieci, z~parametrami podanymi w~sekcji~\ref{sec:trening}.
+\end{description}
+W~wariancie \emph{Unet-A*} każde połączenie korzystające z~sieci było
+dodatkowo wyznaczane bez jej udziału, przy tym samym stanie płytki. Pozwala
+to porównać liczbę rozwiniętych węzłów i~czas wyszukiwania dla tych samych
+zadań, niezależnie od kolejności i~przebiegu wcześniejszych połączeń.
+Dla każdej płytki zapisano liczbę rozwiniętych węzłów, czas trasowania,
+długość ścieżek, liczbę przelotek i~liczbę poprowadzonych połączeń.
+
+Czas trasowania zmierzono osobno dla obu wariantów, w~identyczny sposób.
+Jest to czas działania procedury trasowania: od podziału sieci na
+połączenia dwupinowe do wyznaczenia ostatniej ścieżki. Nie obejmuje on
+wczytania pliku DSN, załadowania modelu ani zapisu pliku SES.
+W~wariancie \emph{Unet-A*} czas obejmuje inferencję sieci, a~kontrolne
+wyszukiwanie bez sieci opisane wyżej było przy tym pomiarze wyłączone.
+Każdy wariant uruchomiono trzykrotnie i~podano medianę. Przed pomiarami
+wykonano jedno nieliczone uruchomienie, aby wyeliminować wpływ
+inicjalizacji karty graficznej.
+
+Dla płytek mieszczących się w~wejściu sieci wygenerowano ponadto próbki
+w~sposób identyczny jak dla zbioru uczącego. Posłużyły one do wyznaczenia
+miar Dice i~IoU (tabela~\ref{tab:miary}), opisujących jakość predykcji sieci
+na płytkach rzeczywistych.
+
+\section{Eksport ścieżek}
+\label{sec:exp-ses}
+
+Ścieżki wyznaczone w~wariantach \emph{A*} i~\emph{Unet-A*} zapisano
+eksporterem opisanym w~sekcji~\ref{sec:format-danych}. Dla każdej płytki
+powstały dwa pliki \emph{Specctra SES}, po jednym dla każdego wariantu.
+Pliki odwołują się do pliku DSN, z~którego powstały, i~zawierają wyłącznie
+ścieżki i~przelotki --- położenia elementów pozostają bez zmian.
+
+\section{Naniesienie wyników na płytki w~EasyEDA}
+\label{sec:exp-import}
+
+W~EasyEDA każdą płytkę testową sklonowano dwukrotnie, osobno dla wariantu
+\emph{A*} i~\emph{Unet-A*}. Ze sklonowanych płytek usunięto ścieżki
+i~przelotki poprowadzone przez autorouter, pozostawiając elementy w~tych
+samych położeniach. Następnie do każdej kopii zaimportowano odpowiedni plik
+SES. W~ten sposób dla każdej płytki testowej uzyskano trzy projekty
+różniące się wyłącznie poprowadzeniem ścieżek. Zaimportowane płytki
+porównano wizualnie z~wynikiem programu Unet-Astar, aby wykluczyć błędy
+przeliczenia współrzędnych.
+
+\section{Odczyt parametrów płytek}
+\label{sec:exp-odczyt}
+
+Dla każdego z~trzech projektów płytki odczytano w~EasyEDA:
+\begin{itemize}
+  \item łączną długość ścieżek,
+  \item liczbę przelotek,
+  \item liczbę niepoprowadzonych połączeń,
+  \item liczbę i~rodzaje naruszeń reguł projektowych zgłoszonych przez
+    DRC.
+\end{itemize}
+% TODO: nazwa funkcji / okna EasyEDA, z którego odczytywane są parametry.
+Parametry jakości trasowania odczytano tym samym narzędziem dla wszystkich
+wariantów. Dzięki temu nie zależą one od sposobu liczenia długości ścieżek
+w~programie Unet-Astar, który posługuje się siatką o~boku 8~mil.
+Miary wydajności wyszukiwania (liczba rozwiniętych węzłów, czas) pochodzą
+z~programu Unet-Astar i~dotyczą wyłącznie wariantów \emph{A*}
+i~\emph{Unet-A*}.
+
+\section{Zestawienie wyników}
+\label{sec:exp-zestawienie}
+
+Parametry odczytane dla wszystkich płytek i~wariantów zestawiono w~tabelach
+porównawczych. Dla każdej płytki porównano warianty \emph{EasyEDA},
+\emph{A*} i~\emph{Unet-A*} pod względem miar jakości trasowania, a~warianty
+\emph{A*} i~\emph{Unet-A*} --- dodatkowo pod względem liczby rozwiniętych
+węzłów i~czasu wyszukiwania. Wyniki zagregowano również dla całego zbioru
+testowego. Wyniki przedstawiono i~omówiono w~rozdziale~\ref{ch:wyniki}.
