@@ -1,12 +1,6 @@
 
 \chapter{Podstawy teoretyczne}
 
-% Rozdział teoretyczny --- przegląd literatury naświetlający stan wiedzy na dany temat. 
-% TODO RL - opis oraz adaptacja w rozwiązaniu
-% TODO Więcej badań trasowania płytek
-% TODO Opis Badania i rejestracja przebiegu badania dla RL_PCB
-% TODO Więcej wniosków dla Trasowania i wnioski dla placementu
-
 W tej sekcji zawarte są definicje związane z problemem.
 
 Przedmiotem badań jest zastosowanie sztucznej inteligencji w~dwóch etapach
@@ -65,17 +59,14 @@ projektowe; KiCad obsługuje ich do~32~\cite{KiCad_PCBEditor_BasicConcepts}.
     sieci~\cite{KiCad_PCBEditor_BasicConcepts}.
 \end{description}
 
-\section{Problem placementu}
-\label{sec:problem-placementu}
-
-% TODO: definicja problemu rozmieszczania elementów (dane wejściowe, wynik,
-% ograniczenia, kryteria oceny -- analogicznie do sekcji o routingu).
-
 \section{Problem routingu}
 
-w problemie routingu, sieci są danymi wejściowymi a na wyjściu oczekuje się modelu fizycznego płytki. Jednak w praktyce
+W problemie routingu, sieci są danymi wejściowymi a na wyjściu oczekuje się modelu fizycznego płytki. Jednak w praktyce
 rozmieszczenie elementów na płytce jest z góry narzucone a zatem również można traktować je jako daną wejściową - co spłyca
-problem routingu do samego prowadzenia ścieżek i rozmieszczania przelotek.
+problem routingu do samego prowadzenia ścieżek i rozmieszczania przelotek. Skuteczność trasowania można 
+zmierzyć różnymi metodami, począwszy od tych prostych --- łączna długość ścieżek, liczba przelotek;
+do najbardziej skomplikowanych --- ocena kompatybilności elektromagnetycznej (ang.~\emph{EMI})
+na podstawie symulacji pola elektromagnetycznego.
 
 \begin{description}
   \item[Dane wejściowe] --- obrys płytki, liczba warstw, rozmieszczone
@@ -86,6 +77,62 @@ problem routingu do samego prowadzenia ścieżek i rozmieszczania przelotek.
   \item[Kryteria oceny] --- odsetek połączonych sieci, łączna długość ścieżek,
     liczba przelotek.
 \end{description}
+
+\section{Problem placementu}
+\label{sec:problem-placementu}
+
+Etapem poprzedzającym trasowanie jest rozmieszczenie elementów na płytce (ang.~\emph{placement}). 
+Jest to krok kluczowy i jednocześnie wymagający szerokiej wiedzy eksperckiej, ze względu na jego 
+złożoność oraz istotny wpływ na kolejne etapy projektu~\cite{Cheng2021DeepPR}. Skuteczne umieszczenie elementów a zatem również 
+padów znacząco upraszcza routowanie. Od dobrego rozwiązania można też oczekiwać pogrupowania obiektów
+w bloki funkcjonalne~\cite{Gora_ProjektowaniePCB}.
+
+\begin{description}
+  \item[Dane wejściowe] --- obrys płytki, footprinty elementów, sieci
+    (netlista) oraz reguły projektowe.
+  \item[Wynik] --- położenie i~orientacja każdego elementu na płytce.
+  \item[Ograniczenia] --- elementy nie nachodzą na siebie i~mieszczą się
+    w~obrysie płytki, z~zachowaniem minimalnych odstępów.
+  \item[Kryteria oceny] --- szacowana długość połączeń, trasowalność,
+    kryteria elektryczne, cieplne i~montażowe.
+\end{description}
+
+Ocena rozmieszczenia jest trudniejsza niż ocena trasowania, ponieważ
+właściwy cel, czyli łatwa do poprowadzenia i~poprawnie działająca płytka,
+ujawnia się dopiero w~kolejnych etapach projektu. Dlatego stosuje się miary
+przybliżone, które da się obliczyć bez prowadzenia ścieżek. Najczęściej
+używaną jest półobwód prostokąta otaczającego (ang.~\emph{Half-Perimeter
+Wire Length}, HPWL). Dla każdej sieci wyznacza się najmniejszy prostokąt
+zawierający wszystkie jej pady, a~HPWL płytki jest sumą połowy obwodów tych
+prostokątów:
+
+\begin{equation}
+  \mathrm{HPWL} = \sum_{n \in N}
+  \Bigl( \max_{p \in n} x_p - \min_{p \in n} x_p
+       + \max_{p \in n} y_p - \min_{p \in n} y_p \Bigr),
+  \label{eq:hpwl}
+\end{equation}
+
+gdzie $N$ jest zbiorem sieci, a~$(x_p, y_p)$ --- położeniem padu~$p$. 
+Miara ta jest szybka do obliczenia, ale słabo przybliża
+rzeczywistą długość ścieżek po trasowaniu~\cite{Cheng2021DeepPR}. Nie
+uwzględnia przeszkód ani konkurencji sieci o~to samo miejsce na płytce.
+
+Z~tego powodu jakość rozmieszczenia ocenia się także pośrednio, przez
+poprowadzenie płytki wybranym trasownikiem i~porównanie wyników trasowania:
+odsetka połączonych sieci, łącznej długości ścieżek i~liczby przelotek. Tak
+oceniano rozmieszczenie w~metodzie RL\_PCB, w~której HPWL jest składową
+funkcji nagrody, a~ostateczną miarą jakości jest długość ścieżek po
+trasowaniu~\cite{Vassallo2024RLPCB}.
+
+Poza długością połączeń rozmieszczenie musi spełniać wymagania praktyczne,
+których nie da się łatwo zapisać jedną liczbą. Należą do nich krótkie
+połączenia kondensatorów odsprzęgających z~pinami zasilania układów
+scalonych, podział płytki na regiony (np. zasilanie, część cyfrowa, część
+analogowa) ograniczający wzajemne zakłócenia bloków, miejsce na płaszczyzny
+miedzi odprowadzające ciepło z~elementów mocy oraz ustalone z~góry położenie
+złączy i~otworów montażowych~\cite{Gora_ProjektowaniePCB}.
+Kryteria te zależą od konkretnego układu i~zwykle ocenia je projektant.
 
 \section{Reguły projektowe}
 
@@ -156,8 +203,6 @@ Trasowanie w~ocenie & --- & zewnętrzny program, z~pominięciem sieci zasilania 
 \bottomrule
 \end{tabular}
 \end{table}
-
-% TODO ogólny opis algorytmów a nie zastosowanie ich w programach
 
 \section{Algorytm A*}
 A* jest heurystycznym algorytmem służącym do znajdowanias najkrótszej ścieżki w grafie.
@@ -344,4 +389,212 @@ z~artykułu, przy $a = P_{\mathrm{lin}}$.
 
 \section{Reinforcement Learning}
 
-%TODO opis ogólny RL oraz adaptacja architektury sieci w RL PCB
+Uczenie ze wzmocnieniem (ang.~\emph{reinforcement learning}, RL) jest
+rodzajem uczenia maszynowego, w~którym agent (regulator) zdobywa wiedzę
+o~obiekcie (procesie, środowisku) metodą prób i~błędów, wchodząc z~nim
+w~interakcję. W~każdym kroku~$k$ agent obserwuje stan obiektu~$x_k$,
+wykonuje akcję~$u_k$ i~obserwuje jej skutek, czyli kolejny stan~$x_{k+1}$.
+Jednocześnie otrzymuje nagrodę~$r_{k+1}$, wyznaczaną przez specjalnie
+zdefiniowaną funkcję nagrody, która ocenia wykonaną akcję. Uczenie polega
+na wypracowaniu takiej strategii wyboru akcji, która maksymalizuje sumę
+nagród (minimalizuje koszt sterowania) na drodze do określonego stanu
+docelowego~\cite{Rak2013RL}. Metodę tę zaproponowano m.in. do
+rozmieszczania elementów na płytce PCB~\cite{Vassallo2024RLPCB}.
+
+Formalny opis uczenia ze wzmocnieniem opiera się na teorii procesów
+decyzyjnych Markowa (ang.~\emph{Markov Decision Process}, MDP). Proces
+taki opisuje czwórka
+\begin{equation}
+  (X, U, f, \rho),
+  \label{eq:mdp}
+\end{equation}
+gdzie:
+\begin{description}
+  \item[$X = \{x_1, x_2, \ldots, x_n\}$] --- skończony zbiór stanów,
+  \item[$U = \{u_1, u_2, \ldots, u_m\}$] --- skończony zbiór akcji,
+  \item[$f$] --- funkcja przejść,
+  \item[$\rho$] --- funkcja nagrody~\cite{Rak2013RL}.
+\end{description}
+
+Agent wybiera akcję zgodnie ze swoją strategią (ang.~\emph{policy})
+$h \colon X \to U$:
+\begin{equation}
+  u_k = h(x_k).
+  \label{rl:action}
+\end{equation}
+Przejście obiektu do stanu następnego określa funkcja przejść
+$f \colon X \times U \to X$:
+\begin{equation}
+  x_{k+1} = f(x_k, u_k).
+  \label{rl:nextstep}
+\end{equation}
+W~tym samym kroku agent otrzymuje nagrodę, będącą liczbą rzeczywistą
+wyznaczaną przez funkcję nagrody $\rho \colon X \times U \to \mathbb{R}$:
+\begin{equation}
+  r_{k+1} = \rho(x_k, u_k).
+  \label{rl:reward}
+\end{equation}
+Następny stan i~nagroda zależą więc wyłącznie od bieżącego stanu
+i~wybranej akcji, a~nie od wcześniejszej historii procesu. Jest to
+własność Markowa, od której proces bierze nazwę~\cite{Rak2013RL}.
+
+Celem uczenia jest strategia maksymalizująca długoterminową sumę nagród
+zebranych na trajektorii rozpoczynającej się w~dowolnym stanie
+początkowym~$x_0$. Sumę tę nazywa się zwrotem (ang.~\emph{return}):
+\begin{equation}
+  R^h(x_0) = \sum_{k=0}^{\infty} \gamma^k \rho\bigl(x_k, h(x_k)\bigr),
+  \label{rl:return}
+\end{equation}
+gdzie $\gamma \in [0, 1)$ jest współczynnikiem dyskontowania. Im mniejsza
+jego wartość, tym mniejszą wagę mają nagrody odległe w~czasie, a~sam
+szereg pozostaje zbieżny. W~praktyce suma jest ograniczona do liczby
+kroków w~danym epizodzie~\cite{Rak2013RL}.
+
+Powyższy opis zakłada deterministyczną funkcję przejść. W~ogólnym
+przypadku przejście jest losowe: funkcję~$f$ zastępuje się rozkładem
+prawdopodobieństwa $p(x_{k+1} \mid x_k, u_k)$, strategia również może
+być losowa, a~zwrot~(\ref{rl:return}) jest wartością
+oczekiwaną~\cite{Sutton2018RL}. Zbiory stanów i~akcji nie muszą być
+też skończone. W~zadaniu rozmieszczania elementów akcja, czyli nowe
+położenie i~obrót elementu, jest wielkością ciągłą.
+
+Strategię w~uczeniu ze wzmocnieniem reprezentuje się za pomocą funkcji
+wartości, określonej dla stanu lub dla pary stan--akcja. W~drugim przypadku
+nazywa się ją Q-funkcją. Jest to odwzorowanie $Q^h \colon X \times U \to \mathbb{R}$, które
+przypisuje parze $(x, u)$ nagrodę za wybranie akcji~$u$ w~stanie~$x$ zgodnie
+ze strategią~$h$, zsumowaną z~wartością zwrotu $R^h$ dla następnego stanu:
+\begin{equation}
+  Q^h(x, u) = \rho(x, u) + \gamma R^h\bigl(f(x, u)\bigr).
+  \label{rl:qfunc}
+\end{equation}
+
+Optymalną Q-funkcją $Q^*$ nazywa się funkcję osiągającą największą wartość
+spośród Q-funkcji wszystkich strategii. Jeśli jest znana, optymalną strategię
+otrzymuje się, wybierając w~każdym stanie akcję o~największej wartości~$Q$.
+Taką strategię nazywa się zachłanną względem~$Q$:
+\begin{equation}
+  h(x) \in \mathop{\arg\max}_{u \in U} Q(x, u).
+  \label{rl:greedy}
+\end{equation}
+
+Jeśli model procesu, czyli funkcje $f$ i~$\rho$, jest znany, $Q^*$ można
+wyznaczyć metodami programowania dynamicznego. W~praktyce model zwykle
+nie jest znany, a~wiedza o~procesie pochodzi wyłącznie z~interakcji agenta
+ze środowiskiem. Wtedy $Q^*$ szacuje się algorytmem Q-learning, który po
+każdym kroku aktualizuje wartość dla odwiedzonej pary stan--akcja~\cite{Rak2013RL}:
+\begin{equation}
+  Q_{k+1}(x_k, u_k) = Q_k(x_k, u_k) + \alpha_k \Bigl[ r_{k+1}
+  + \gamma \max_{u'} Q_k(x_{k+1}, u') - Q_k(x_k, u_k) \Bigr],
+  \label{rl:q-learning}
+\end{equation}
+gdzie $\alpha_k \in (0, 1]$ jest współczynnikiem uczenia. Wyrażenie w~nawiasie
+kwadratowym to błąd różnicy czasowej (ang.~\emph{temporal difference}, TD).
+Jest to różnica między nową estymatą $r_{k+1} + \gamma \max_{u'} Q_k(x_{k+1}, u')$,
+opartą na otrzymanej nagrodzie i~ocenie następnego stanu, a~estymatą bieżącą
+$Q_k(x_k, u_k)$. Przy liczbie kroków dążącej do nieskończoności wartości
+$Q_k$ zbiegają się do~$Q^*$~\cite{Rak2013RL}. Warunkiem jest, aby każda para
+stan--akcja była odwiedzana wielokrotnie. Dlatego agent nie może zawsze wybierać
+akcji zachłannej~(\ref{rl:greedy}): musi łączyć wykorzystywanie zdobytej wiedzy
+z~eksploracją, np. wybierając z~niewielkim prawdopodobieństwem akcję losową~\cite{Sutton2018RL}.
+
+W~podstawowej wersji algorytmu tworzy się tablicę o~rozmiarze $|X| \times |U|$,
+w~której zapisuje się wartości Q-funkcji. Dla problemów, w~których przestrzenie
+stanów i~akcji są bardzo duże, jest to bardzo kosztowne, a~dla przestrzeni ciągłych
+niemożliwe. W~takiej sytuacji Q-funkcję zastępuje się aproksymatorem sparametryzowanym
+wektorem~$\theta$. Algorytm przechowuje i~aktualizuje parametry~$\theta$, a~nie
+same wartości funkcji~\cite{Rak2013RL}. Gdy aproksymatorem jest głęboka sieć neuronowa,
+mówi się o~głębokim uczeniu ze wzmocnieniem (ang.~\emph{deep reinforcement learning}).
+
+Aproksymacja Q-funkcji nie rozwiązuje jednak problemu ciągłej przestrzeni
+akcji. Aktualizacja~(\ref{rl:q-learning}) i~strategia
+zachłanna~(\ref{rl:greedy}) wymagają wyznaczenia maksimum $Q$ po wszystkich
+akcjach, co przy akcjach ciągłych jest osobnym zadaniem optymalizacji
+wykonywanym w~każdym kroku. Z~tego powodu przy akcjach ciągłych, takich jak
+położenie i~obrót elementu na płytce, stosuje się metody aktor--krytyk.
+W~tych metodach osobna sieć (aktor) bezpośrednio wyznacza akcję, a~Q-funkcja
+(krytyk) służy do jej oceny.
+
+\subsection{Algorytm TD3}
+\label{sec:td3}
+
+TD3 (ang.~\emph{Twin Delayed Deep Deterministic Policy Gradient}) jest
+algorytmem typu aktor--krytyk dla ciągłych przestrzeni akcji~\cite{Fujimoto2018TD3}.
+Aktor jest siecią neuronową $\pi_\phi$, która dla stanu~$x$ zwraca
+deterministyczną akcję $u = \pi_\phi(x)$. Krytyk jest siecią $Q_\theta(x, u)$
+przybliżającą Q-funkcję. Zamiast maksimum we wzorze~(\ref{rl:q-learning})
+wartość docelową wyznacza się dla akcji proponowanej przez aktora:
+\begin{equation}
+  y = r_{k+1} + \gamma \min_{i=1,2} Q_{\theta'_i}\bigl(x_{k+1}, \tilde{u}\bigr),
+  \qquad
+  \tilde{u} = \pi_{\phi'}(x_{k+1}) + \epsilon,
+  \label{rl:td3-target}
+\end{equation}
+gdzie $\theta'_i$ i~$\phi'$ są parametrami tzw.\ sieci docelowych, a~$\epsilon$
+jest przyciętym szumem gaussowskim. Krytyk minimalizuje błąd średniokwadratowy
+między $Q_\theta(x_k, u_k)$ a~$y$. Aktor jest uczony metodą gradientową tak,
+aby maksymalizować ocenę krytyka $Q_{\theta_1}\bigl(x, \pi_\phi(x)\bigr)$.
+Pełni więc rolę strategii zachłannej~(\ref{rl:greedy}), której nie da się
+wyznaczyć wprost.
+
+Algorytm wprowadza trzy modyfikacje względem swojego poprzednika, DDPG,
+które ograniczają przeszacowanie wartości Q-funkcji wynikające
+z~operatora maksimum~\cite{Fujimoto2018TD3}:
+\begin{itemize}
+  \item dwóch krytyków (ang.~\emph{twin}) --- wartość docelowa jest minimum
+    z~ich ocen,
+  \item opóźniona aktualizacja aktora (ang.~\emph{delayed}) --- aktor
+    i~sieci docelowe są aktualizowane rzadziej niż krytycy, np.\ co drugi krok,
+  \item wygładzanie strategii docelowej --- szum~$\epsilon$ dodany do akcji
+    docelowej sprawia, że podobne akcje otrzymują podobne oceny.
+\end{itemize}
+Sieci docelowe są powoli przesuwane w~stronę sieci uczonych
+(np.\ $\theta' \leftarrow \tau\theta + (1-\tau)\theta'$ dla małego~$\tau$).
+Przejścia $(x_k, u_k, r_{k+1}, x_{k+1})$ zapisywane są w~buforze powtórek
+(ang.~\emph{replay buffer}), z~którego losuje się paczki do uczenia.
+Eksplorację zapewnia szum gaussowski dodawany do akcji aktora.
+
+\subsection{Adaptacja uczenia ze wzmocnieniem w~metodzie RL\_PCB}
+\label{sec:rl-pcb}
+
+W~metodzie RL\_PCB rozmieszczanie elementów sformułowano jako proces
+decyzyjny Markowa, a~strategię uczy się algorytmem TD3 lub
+SAC~\cite{Vassallo2024RLPCB,Vassallo_RLPCB_GitHub}. Każdy element płytki
+jest osobnym agentem, a~wszystkie elementy korzystają z~tej samej sieci
+aktora i~krytyka. Przejścia wszystkich elementów trafiają do wspólnego
+bufora powtórek, dzięki czemu sieci uczą się, jak przesunąć dowolny element
+w~jego lokalnym otoczeniu, niezależnie od konkretnej płytki. Na podstawie
+kodu źródłowego~\cite{Vassallo_RLPCB_GitHub} poszczególne elementy procesu
+można opisać następująco:
+\begin{description}
+  \item[Stan] --- 23-elementowy wektor obserwacji jednego elementu:
+    wolne kierunki wokół elementu (8~wartości), stopień nakładania się na
+    sąsiadów w~8~kierunkach, wektor do padów połączonych z~nim sieciami,
+    odległość i~kąt do środka grupy sąsiadów, położenie znormalizowane do
+    wymiarów płytki oraz orientacja.
+  \item[Akcja] --- trzy liczby ciągłe: długość kroku, kierunek ruchu oraz
+    obrót, zaokrąglany do wielokrotności~90°.
+  \item[Nagroda] --- łączy względną poprawę długości euklidesowej połączeń
+    $x_W$, względną poprawę HPWL $x_H$ oraz składnik $o \in [0, 1]$,
+    równy~1 przy braku nakładania się elementów:
+    \begin{equation}
+      r = \tan\left( \frac{w\,x_W + m\,o + p\,x_H}{w + m + p}
+          \cdot \frac{\pi}{2{,}1} \right),
+      \label{rl:rlpcb-reward}
+    \end{equation}
+    gdzie $w$, $m$, $p$ są wagami składowych. Poprawy $x_W$ i~$x_H$ liczone
+    są względem położenia początkowego i~najlepszego znanego wyniku
+    i~przycinane do przedziału $[-1, 1]$. Funkcja tangens silnie nagradza
+    stany bliskie najlepszemu rozwiązaniu.
+  \item[Koniec epizodu] --- po ustalonej liczbie kroków lub po wyjściu
+    elementu poza płytkę. W~drugim przypadku agent otrzymuje karę
+    proporcjonalną do liczby pozostałych kroków.
+\end{description}
+
+Sformułowanie to jest przybliżeniem procesu decyzyjnego Markowa.
+Obserwacja obejmuje tylko otoczenie jednego elementu, a~w~tym samym kroku
+poruszają się również pozostałe elementy. Następny stan zależy więc także
+od akcji innych agentów, a~własność Markowa jest spełniona jedynie
+w~przybliżeniu. Ponadto wartości odniesienia w~nagrodzie zmieniają się
+w~miarę znajdowania lepszych rozwiązań. Po zakończeniu uczenia krytyk nie
+jest już potrzebny: rozmieszczenie wykonuje wyłącznie aktor, który dla
+każdego elementu wyznacza kolejne przesunięcia.

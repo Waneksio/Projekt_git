@@ -4,44 +4,79 @@
 \contentsline {chapter}{\chapternumberline {2}Podstawy teoretyczne}{2}{chapter.2}%
 \contentsline {section}{\numberline {2.1}Budowa PCB}{2}{section.2.1}%
 \contentsline {subsection}{\numberline {2.1.1}Elementy PCB}{3}{subsection.2.1.1}%
-\contentsline {section}{\numberline {2.2}Problem placementu}{3}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Problem routingu}{3}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Reguły projektowe}{3}{section.2.4}%
-\contentsline {section}{\numberline {2.5}Algorytm A*}{4}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}Adaptacja algorytmu A* w~metodzie Unet-Astar}{5}{subsection.2.5.1}%
-\contentsline {section}{\numberline {2.6}Algorytm Lee}{6}{section.2.6}%
-\contentsline {section}{\numberline {2.7}Konwolucyjne sieci neuronowe}{6}{section.2.7}%
-\contentsline {section}{\numberline {2.8}U-net}{7}{section.2.8}%
-\contentsline {section}{\numberline {2.9}Deeper U-Net i Unet-Astar}{7}{section.2.9}%
-\contentsline {section}{\numberline {2.10}Reinforcement Learning}{7}{section.2.10}%
-\contentsline {chapter}{\chapternumberline {3}Rozwinięcie}{8}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Cel badań}{8}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Przebieg badań}{8}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Środowisko badawcze}{9}{section.3.3}%
-\contentsline {section}{\numberline {3.4}Format danych i~współpraca z~EasyEDA}{9}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Zbiór uczący}{10}{section.3.5}%
-\contentsline {section}{\numberline {3.6}Model i~trening}{11}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Zbiór testowy}{11}{section.3.7}%
-\contentsline {section}{\numberline {3.8}Miary oceny}{12}{section.3.8}%
-\contentsline {section}{\numberline {3.9}Ocena kompatybilności elektromagnetycznej}{12}{section.3.9}%
-\contentsline {section}{\numberline {3.10}Modyfikacje kodu źródłowego}{13}{section.3.10}%
-\contentsline {section}{\numberline {3.11}Ograniczenia}{13}{section.3.11}%
-\contentsline {chapter}{\chapternumberline {4}Badania}{14}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Przygotowanie sieci neuronowej}{14}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Przygotowanie płytek testowych}{15}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Trasowanie autorouterem EasyEDA}{15}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Eksport plików DSN}{16}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Trasowanie programem Unet-Astar}{16}{section.4.5}%
-\contentsline {section}{\numberline {4.6}Eksport ścieżek}{16}{section.4.6}%
-\contentsline {section}{\numberline {4.7}Naniesienie wyników na płytki w~EasyEDA}{16}{section.4.7}%
-\contentsline {section}{\numberline {4.8}Odczyt parametrów płytek}{17}{section.4.8}%
-\contentsline {section}{\numberline {4.9}Zestawienie wyników}{17}{section.4.9}%
-\contentsline {chapter}{\chapternumberline {5}Wyniki}{18}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Płytka z~diodą LED}{18}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Płytka przykładowa EasyEDA}{20}{section.5.2}%
-\contentsline {chapter}{\chapternumberline {6}Wnioski}{23}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Skuteczność trasowania}{23}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Czas trasowania}{23}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Kierunki dalszych prac w~zakresie trasowania}{23}{section.6.3}%
-\contentsline {chapter}{\chapternumberline {7}Zakończenie}{25}{chapter.7}%
-\contentsline {chapter}{Literatura}{26}{chapter*.3}%
+\contentsline {section}{\numberline {2.2}Problem routingu}{3}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Problem placementu}{3}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Reguły projektowe}{4}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Algorytm A*}{5}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Adaptacja algorytmu A* w~metodzie Unet-Astar}{6}{subsection.2.5.1}%
+\contentsline {section}{\numberline {2.6}Algorytm Lee}{7}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Konwolucyjne sieci neuronowe}{7}{section.2.7}%
+\contentsline {section}{\numberline {2.8}U-net}{8}{section.2.8}%
+\contentsline {section}{\numberline {2.9}Deeper U-Net i Unet-Astar}{8}{section.2.9}%
+\contentsline {section}{\numberline {2.10}Reinforcement Learning}{8}{section.2.10}%
+\contentsline {subsection}{\numberline {2.10.1}Algorytm TD3}{10}{subsection.2.10.1}%
+\contentsline {subsection}{\numberline {2.10.2}Adaptacja uczenia ze wzmocnieniem w~metodzie RL\_PCB}{10}{subsection.2.10.2}%
+\contentsline {chapter}{\chapternumberline {3}Rozwinięcie}{12}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Cel badań}{12}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Trasowanie}{12}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Rozmieszczanie elementów}{12}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}Przebieg badań}{13}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Trasowanie}{13}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Rozmieszczanie elementów}{13}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.3}Środowisko badawcze}{14}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Format danych i~współpraca z~EasyEDA}{14}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Trasowanie}{14}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Rozmieszczanie elementów}{15}{subsection.3.4.2}%
+\contentsline {section}{\numberline {3.5}Zbiór uczący}{15}{section.3.5}%
+\contentsline {subsection}{\numberline {3.5.1}Trasowanie}{15}{subsection.3.5.1}%
+\contentsline {subsection}{\numberline {3.5.2}Rozmieszczanie elementów}{16}{subsection.3.5.2}%
+\contentsline {section}{\numberline {3.6}Model i~trening}{16}{section.3.6}%
+\contentsline {subsection}{\numberline {3.6.1}Trasowanie}{16}{subsection.3.6.1}%
+\contentsline {subsection}{\numberline {3.6.2}Rozmieszczanie elementów}{17}{subsection.3.6.2}%
+\contentsline {section}{\numberline {3.7}Zbiór testowy}{18}{section.3.7}%
+\contentsline {subsection}{\numberline {3.7.1}Trasowanie}{18}{subsection.3.7.1}%
+\contentsline {subsection}{\numberline {3.7.2}Rozmieszczanie elementów}{18}{subsection.3.7.2}%
+\contentsline {section}{\numberline {3.8}Miary oceny}{18}{section.3.8}%
+\contentsline {subsection}{\numberline {3.8.1}Trasowanie}{18}{subsection.3.8.1}%
+\contentsline {subsection}{\numberline {3.8.2}Rozmieszczanie elementów}{19}{subsection.3.8.2}%
+\contentsline {section}{\numberline {3.9}Ocena kompatybilności elektromagnetycznej}{19}{section.3.9}%
+\contentsline {section}{\numberline {3.10}Modyfikacje kodu źródłowego}{20}{section.3.10}%
+\contentsline {subsection}{\numberline {3.10.1}Unet-Astar}{20}{subsection.3.10.1}%
+\contentsline {subsection}{\numberline {3.10.2}RL\_PCB}{20}{subsection.3.10.2}%
+\contentsline {section}{\numberline {3.11}Ograniczenia}{21}{section.3.11}%
+\contentsline {subsection}{\numberline {3.11.1}Trasowanie}{21}{subsection.3.11.1}%
+\contentsline {subsection}{\numberline {3.11.2}Rozmieszczanie elementów}{21}{subsection.3.11.2}%
+\contentsline {chapter}{\chapternumberline {4}Badania}{22}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Trasowanie}{22}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Przygotowanie sieci neuronowej}{22}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Przygotowanie płytek testowych}{23}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}Trasowanie autorouterem EasyEDA}{24}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}Eksport plików DSN}{24}{subsection.4.1.4}%
+\contentsline {subsection}{\numberline {4.1.5}Trasowanie programem Unet-Astar}{24}{subsection.4.1.5}%
+\contentsline {subsection}{\numberline {4.1.6}Eksport ścieżek}{24}{subsection.4.1.6}%
+\contentsline {subsection}{\numberline {4.1.7}Naniesienie wyników na płytki w~EasyEDA}{25}{subsection.4.1.7}%
+\contentsline {subsection}{\numberline {4.1.8}Odczyt parametrów płytek}{25}{subsection.4.1.8}%
+\contentsline {subsection}{\numberline {4.1.9}Zestawienie wyników}{25}{subsection.4.1.9}%
+\contentsline {section}{\numberline {4.2}Rozmieszczanie elementów}{25}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Eksport płytek z~EasyEDA}{25}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Import płytek do programu KiCad}{26}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Konwersja płytek do formatu RL\_PCB}{26}{subsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.2.4}Trening polityki}{26}{subsection.4.2.4}%
+\contentsline {subsection}{\numberline {4.2.5}Rozmieszczenie płytek testowych}{26}{subsection.4.2.5}%
+\contentsline {subsection}{\numberline {4.2.6}Konwersja wyników i~walidacja}{27}{subsection.4.2.6}%
+\contentsline {chapter}{\chapternumberline {5}Wyniki}{28}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Płytka z~diodą LED}{28}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Płytka przykładowa EasyEDA}{30}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Płytka modułu PT4115}{32}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Płytka CKT~4}{35}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Płytka stabilizatora L7815}{38}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Rozmieszczanie elementów}{40}{section.5.6}%
+\contentsline {chapter}{\chapternumberline {6}Wnioski}{44}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Skuteczność trasowania}{44}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Czas trasowania}{44}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Kierunki dalszych prac w~zakresie trasowania}{45}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Skuteczność rozmieszczania elementów}{45}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Czas rozmieszczania elementów}{46}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Kierunki dalszych prac w~zakresie rozmieszczania elementów}{46}{section.6.6}%
+\contentsline {chapter}{\chapternumberline {7}Zakończenie}{47}{chapter.7}%
+\contentsline {chapter}{Literatura}{48}{chapter*.3}%

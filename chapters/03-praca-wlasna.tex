@@ -3,12 +3,18 @@
 
 W~rozdziale opisano przedmiot i~metodykę badań. Przedstawiono cel badań,
 przebieg eksperymentu, sposób przygotowania danych uczących i~testowych,
-porównywane warianty trasowania oraz miary, według których je oceniano.
-
-% TODO: część dotycząca RL_PCB (rozmieszczanie elementów).
+porównywane warianty trasowania i~rozmieszczania elementów oraz miary,
+według których je oceniano.
 
 \section{Cel badań}
 \label{sec:cel-badan}
+
+Badania obejmują dwa etapy projektowania płytki: trasowanie połączeń
+oraz poprzedzające je rozmieszczenie elementów. Dla każdego z~nich
+sformułowano osobne pytania badawcze.
+
+\subsection{Trasowanie}
+\label{sec:cel-trasowanie}
 
 Celem badań jest ocena, czy rozwiązanie Unet-Astar~\cite{Yin2023UnetAstar}
 wytrenowane wyłącznie na syntetycznych, losowo generowanych płytkach może
@@ -25,8 +31,35 @@ następujące pytania badawcze:
     z~punktu widzenia kompatybilności elektromagnetycznej?
 \end{enumerate}
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:cel-rozmieszczanie}
+
+Celem tej części badań jest ocena, czy polityka rozmieszczania elementów
+wytrenowana metodą RL\_PCB~\cite{Vassallo2024RLPCB} na syntetycznych
+płytkach daje poprawne i~użyteczne rozmieszczenie na płytkach rzeczywistych.
+Polityka uczona była na niewielkich, kwadratowych płytkach, a~płytki testowe
+różnią się od nich wymiarami, proporcjami boków oraz liczbą i~rozmiarem
+elementów. Sformułowano następujące pytania badawcze:
+\begin{enumerate}
+  \setcounter{enumi}{3}
+  \item Czy rozmieszczenie wyznaczone przez politykę jest dopuszczalne, tzn.
+    czy elementy nie nachodzą na siebie, zachowują wymagane odstępy
+    i~w~całości mieszczą się w~obrysie płytki?
+  \item Jak jakość rozmieszczenia, mierzona sumą półobwodów prostokątów
+    otaczających poszczególne sieci (HPWL, wzór~\ref{eq:hpwl}) oraz
+    powierzchnią prostokąta otaczającego wszystkie elementy, wypada na tle
+    rozmieszczenia wykonanego ręcznie przez projektanta?
+  \item Czy rozmieszczenie wyznaczone przez politykę ułatwia trasowanie, tzn.
+    jak zmieniają się odsetek połączonych sieci, długość ścieżek i~liczba
+    przelotek po poprowadzeniu płytki tym samym trasownikiem co
+    rozmieszczenie ręczne?
+\end{enumerate}
+
 \section{Przebieg badań}
 \label{sec:przebieg-badan}
+
+\subsection{Trasowanie}
+\label{sec:przebieg-trasowanie}
 
 Algorytm Unet-Astar nie wyznacza ścieżek samodzielnie --- sieć neuronowa
 jedynie zmienia kolejność rozwijania węzłów przez A*
@@ -62,6 +95,35 @@ Badania przebiegały w~następujących krokach:
 Wszystkie warianty otrzymują identyczne dane wejściowe: obrys płytki, rozmieszczenie
 elementów, sieci oraz reguły projektowe zapisane w~tym samym pliku DSN.
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:przebieg-rozmieszczanie}
+
+W~badaniach rozmieszczania porównano dwa warianty:
+\begin{description}
+  \item[Ręczny] --- rozmieszczenie wykonane przez projektanta płytki
+    (wariant odniesienia);
+  \item[RL\_PCB] --- rozmieszczenie wyznaczone przez wytrenowaną politykę
+    TD3 (sekcja~\ref{sec:rl-pcb}).
+\end{description}
+
+Badanie obejmuje następujące kroki:
+\begin{enumerate}
+  \item Trening polityki na płytce z~zestawu danych repozytorium RL\_PCB
+    (sekcja~\ref{sec:trening}).
+  \item Przygotowanie płytek testowych w~programie KiCad i~ich konwersja
+    do formatu wejściowego RL\_PCB, ze wskazaniem elementu zablokowanego
+    (sekcja~\ref{sec:format-danych}).
+  \item Wyznaczenie rozmieszczenia przez politykę i~zapis wyniku z~powrotem
+    do pliku KiCad.
+  \item Ocena dopuszczalności i~jakości rozmieszczenia
+    (sekcja~\ref{sec:miary}).
+  \item Poprowadzenie płytki w~obu wariantach rozmieszczenia tym samym
+    trasownikiem i~porównanie wyników trasowania.
+\end{enumerate}
+
+Oba warianty otrzymują te same dane wejściowe: obrys płytki, footprinty
+elementów i~sieci. Różnią się wyłącznie położeniem i~orientacją elementów.
+
 \section{Środowisko badawcze}
 \label{sec:srodowisko}
 
@@ -80,13 +142,20 @@ Pamięć RAM & 24~GB, 2133~MT/s \\
 \midrule
 Karta graficzna & NVIDIA GeForce GTX 1060, 3~GB \\
 \midrule
-Python & 3.8.10 \\
+Python & 3.8.10 (Unet-Astar), 3.8 (RL\_PCB) \\
 \midrule
-PyTorch & 2.4.1 (CUDA 12.1) \\
+PyTorch & 2.4.1 z~CUDA 12.1 (Unet-Astar), 1.13.1 z~CUDA 11.7 (RL\_PCB) \\
+\midrule
+Podsystem Linux & WSL, Ubuntu (RL\_PCB) \\
+\midrule
+KiCad & wersja 10 \\
 \midrule
 EasyEDA & Standard, wersja 6.5.61 \\
 \midrule
 Unet-Astar & repozytorium~\cite{Firesuiry_UnetAstar_GitHub} wraz
+  z~modyfikacjami opisanymi w~sekcji~\ref{sec:modyfikacje} \\
+\midrule
+RL\_PCB & repozytorium~\cite{Vassallo_RLPCB_GitHub} wraz
   z~modyfikacjami opisanymi w~sekcji~\ref{sec:modyfikacje} \\
 \bottomrule
 \end{tabular}
@@ -94,6 +163,10 @@ Unet-Astar & repozytorium~\cite{Firesuiry_UnetAstar_GitHub} wraz
 
 \section{Format danych i~współpraca z~EasyEDA}
 \label{sec:format-danych}
+
+
+\subsection{Trasowanie}
+\label{sec:format-trasowanie}
 
 Wymiana danych z~EasyEDA odbywa się za pośrednictwem plików autoroutera
 w~formacie \emph{Specctra}. Plik DSN zawiera obrys płytki, definicje warstw,
@@ -123,8 +196,39 @@ Ponieważ siatka o~boku 8~mil nie pokrywa się ze środkami padów, końce
 może naruszać reguły odstępów, dlatego zaimportowana płytka jest
 sprawdzana narzędziem DRC programu EasyEDA.
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:format-rozmieszczanie}
+
+RL\_PCB wczytuje płytki we własnym formacie tekstowym. Każda płytka
+zapisana jest w~nim jako graf: węzłami są elementy (wymiary, położenie,
+orientacja, liczba padów, informacja o~zablokowaniu), a~krawędziami pary
+padów należących do tej samej sieci. Plik zawiera też prostokąt
+opisany na obrysie płytki. W~repozytorium pliki w~tym formacie tworzy
+osobne narzędzie autora metody, które w~czasie badań nie było dostępne.
+Z~tego powodu na potrzeby badań przygotowano własny konwerter plików
+programu KiCad, działający w~obu kierunkach:
+\begin{itemize}
+  \item konwersja z~formatu KiCad: wymiary elementu wyznaczane są
+    z~padów oraz warstw obrysu montażowego, opisu i~dokumentacji, pady
+    zapisywane są we współrzędnych elementu przed obrotem, a~każda sieć
+    zamieniana jest na krawędzie łączące wszystkie pary jej padów; sieci
+    zasilania rozpoznawane są po nazwie; współrzędne przesuwane są do
+    początku obrysu płytki, a~element zablokowany --- domyślnie największy
+    --- przenoszony jest na środek płytki;
+  \item konwersja do formatu KiCad: nowe położenie i~orientacja każdego
+    elementu wpisywane są do pliku źródłowego, a~elementy podrzędne
+    (pady, opisy, strefy) obracane są razem z~elementem; ścieżki
+    i~przelotki są usuwane, ponieważ po zmianie rozmieszczenia tracą sens.
+\end{itemize}
+Aby zaimportować płytkę z EasyEDA w KiCadzie należy wyeksportować ją 
+do formatu JSON a następnie w edytorze płytek KiCad wybrać opcję importu
+\emph{Importuj płytkę spoza programu KiCad}.
+
 \section{Zbiór uczący}
 \label{sec:zbior-uczacy}
+
+\subsection{Trasowanie}
+\label{sec:zbior-uczacy-trasowanie}
 
 Sieć trenowano wyłącznie na płytkach syntetycznych, generowanych losowo zgodnie
 z~procedurą z~repozytorium Unet-Astar. Parametry generatora zestawiono
@@ -198,8 +302,25 @@ wykorzystano etykiety wyznaczone zgodnie z~implementacją.
 Uzyskano 13\,830 próbek. Zbiór podzielono losowo w~proporcji
 90:10 na część uczącą i~walidacyjną.
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:zbior-uczacy-rozmieszczanie}
+
+Uczenie ze wzmocnieniem nie wymaga etykiet: agent zbiera doświadczenie,
+wchodząc w~interakcję ze środowiskiem zbudowanym na podstawie płytki
+uczącej. Repozytorium RL\_PCB zawiera sześć płytek uczących i~trzy
+płytki ewaluacyjne. Zgodnie z~konfiguracją testu treningowego
+z~repozytorium polityka uczona była na jednej z~nich ---
+\emph{tc\_logger\_mcu} o~wymiarach $20 \times 20$~mm, zawierającej układ
+scalony (element zablokowany) oraz trzy elementy bierne. Na początku
+każdego epizodu środowisko losowo zmienia położenie i~orientację
+elementów, dzięki czemu agent obserwuje wiele różnych układów tej samej
+płytki.
+
 \section{Model i~trening}
 \label{sec:trening}
+
+\subsection{Trasowanie}
+\label{sec:trening-trasowanie}
 
 Repozytorium zawiera trzy architektury: klasyczny U-Net (31~mln parametrów),
 U-Net++ (47~mln) oraz głęboką sieć \emph{ResNetUNet} zaproponowaną przez
@@ -209,7 +330,6 @@ z~3~GB pamięci wykazała, że już przy dwóch próbkach w~paczce zapotrzebowan
 na pamięć przekracza jej pojemność. Trening trwał wówczas ponad 4~s na
 paczkę. Z~tego powodu w~badaniach wykorzystano klasyczny U-Net, który przy
 czterech próbkach w~paczce zajmuje ok.~2~GB pamięci.
-% TODO: Google Colab -- dopisać.
 
 \begin{table}[ht]
 \fcmtcaption{Parametry treningu. Źródło: opracowanie własne.}\label{tab:trening}
@@ -245,6 +365,57 @@ Wynik sieci $s(n)$ modyfikuje funkcję oceny węzła zgodnie ze
 wzorem~\ref{eq:unet-astar-f}, z~parametrami $a = 800$ i~$b = 0$,
 przyjętymi za eksperymentami autorów.
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:trening-rozmieszczanie}
+
+Politykę uczono algorytmem TD3 (sekcja~\ref{sec:td3}) z~parametrami testu
+treningowego z~repozytorium RL\_PCB, zestawionymi
+w~tabeli~\ref{tab:trening-rl}. Przeprowadzono dwa przebiegi treningu
+z~różnymi ziarnami generatora liczb losowych. Uruchomione równolegle
+trwały łącznie ok.~8~h. Do rozmieszczania płytek testowych wykorzystano
+model, który w~trakcie treningu osiągnął największy zwrot.
+
+\begin{table}[ht]
+\fcmtcaption{Parametry treningu polityki RL\_PCB. Źródło: opracowanie
+własne na podstawie kodu źródłowego~\cite{Vassallo_RLPCB_GitHub}.}\label{tab:trening-rl}
+\centering\footnotesize%
+\begin{tabular}{p{0.45\textwidth} p{0.45\textwidth}}
+\toprule
+Parametr & Wartość \\
+\midrule
+Algorytm & TD3 \\
+\midrule
+Aktor i~krytyk & sieci w~pełni połączone, warstwy 400 i~300 neuronów,
+  aktywacja ReLU \\
+\midrule
+Wektor stanu / akcji & 23 / 3 wartości \\
+\midrule
+Współczynnik uczenia & $10^{-3}$ \\
+\midrule
+Współczynnik dyskontowania $\gamma$ & 0{,}99 \\
+\midrule
+Współczynnik $\tau$ & 0{,}005 \\
+\midrule
+Rozmiar paczki & 128 \\
+\midrule
+Bufor powtórek & początkowo 25\,000 przejść, podwajany w~trakcie treningu \\
+\midrule
+Szum eksploracji / wygładzania & 0{,}1 / 0{,}2 (przycięcie 0{,}5) \\
+\midrule
+Aktualizacja aktora & co 2 kroki krytyka \\
+\midrule
+Kroki losowe na początku & 5000 \\
+\midrule
+Liczba kroków treningu & 300\,000 \\
+\midrule
+Długość epizodu & 200 kroków \\
+\midrule
+Wagi nagrody $w$ / $p$ / $m$ & 2 / 6 / 2 (długość euklidesowa / HPWL /
+  nakładanie się) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Zbiór testowy}
 \label{sec:zbior-testowy}
 
@@ -256,6 +427,9 @@ w~treningu:
     projekt przykładowy \emph{Project-Sample} z~sekcji
     \emph{Modules}~\cite{EasyEDA_ProjectSample}.
 \end{itemize}
+
+\subsection{Trasowanie}
+\label{sec:zbior-testowy-trasowanie}
 
 Z~zaimportowanych projektów przed trasowaniem usuwane są ścieżki
 i~przelotki poprowadzone przez ich autorów, tak aby wszystkie warianty
@@ -281,8 +455,30 @@ połączenia dwupinowe. Mają też gęsto rozmieszczone pady elementów SMD
 o~różnych kształtach i~nierównomierne zagęszczenie połączeń. Badanie
 ma zatem charakter oceny zdolności uogólniania modelu.
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:zbior-testowy-rozmieszczanie}
+
+Do badań rozmieszczania wykorzystano te same płytki, zaimportowane
+z~EasyEDA do programu KiCad. Rozmieszczenie wykonane przez projektanta
+stanowi wariant odniesienia, a~polityka wyznacza nowe położenia
+wszystkich elementów z~wyjątkiem zablokowanego. Ze względu na
+ograniczenia metody płytki testowe muszą spełniać następujące warunki:
+\begin{itemize}
+  \item dokładnie jeden element zablokowany, umieszczany na środku
+    płytki;
+  \item elementy wyłącznie po jednej stronie płytki;
+  \item obrys prostokątny --- metoda uwzględnia wyłącznie prostokąt
+    opisany na obrysie płytki.
+\end{itemize}
+Płytki testowe różnią się od płytki uczącej wymiarami, proporcjami boków
+oraz liczbą i~rodzajem elementów, więc również ta część badań ma
+charakter oceny zdolności uogólniania.
+
 \section{Miary oceny}
 \label{sec:miary}
+
+\subsection{Trasowanie}
+\label{sec:miary-trasowanie}
 
 Miary zestawiono w~tabeli~\ref{tab:miary}. Miary jakości trasowania
 odczytywane są w~EasyEDA po zaimportowaniu wyniku, dzięki czemu wszystkie
@@ -331,10 +527,50 @@ Dice, IoU & zgodność maski przewidzianej przez sieć (próg 0{,}5)
 Wyniki dla każdej płytki testowej zapisywane są w~osobnym pliku, a~następnie
 agregowane dla całego zbioru testowego.
 
+\subsection{Rozmieszczanie elementów}
+\label{sec:miary-rozmieszczanie}
+
+Miary oceny rozmieszczenia zestawiono w~tabeli~\ref{tab:miary-rl}.
+Miary dopuszczalności decydują o~tym, czy rozmieszczenie w~ogóle nadaje się
+do dalszego projektowania. Miary jakości porównywane są wyłącznie dla
+rozmieszczeń dopuszczalnych.
+
+\begin{table}[ht]
+\fcmtcaption{Miary oceny rozmieszczenia. Źródło: opracowanie własne.}\label{tab:miary-rl}
+\centering\footnotesize%
+\begin{tabular}{p{0.28\textwidth} p{0.62\textwidth}}
+\toprule
+Miara & Opis \\
+\midrule
+\multicolumn{2}{l}{\emph{Dopuszczalność}} \\
+\midrule
+Nakładanie się elementów & liczba par elementów, których obrysy
+  montażowe nachodzą na siebie \\
+\midrule
+Odstępy & liczba naruszeń minimalnego odstępu między elementami
+  zgłoszonych przez DRC \\
+\midrule
+Elementy poza obrysem & liczba elementów wystających poza obrys płytki \\
+\midrule
+\multicolumn{2}{l}{\emph{Jakość rozmieszczenia}} \\
+\midrule
+HPWL & suma półobwodów prostokątów otaczających pady poszczególnych
+  sieci (wzór~\ref{eq:hpwl}) \\
+\midrule
+Pole zajęte przez elementy & pole prostokąta otaczającego wszystkie
+  elementy \\
+\midrule
+\multicolumn{2}{l}{\emph{Wpływ na trasowanie}} \\
+\midrule
+Odsetek połączeń, długość ścieżek, liczba przelotek & miary z~tabeli~\ref{tab:miary}
+  po poprowadzeniu płytki tym samym trasownikiem \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Ocena kompatybilności elektromagnetycznej}
 \label{sec:emc}
 
-% EMI jeśli się uda
 Środowisko EasyEDA nie udostępnia symulacji pola elektromagnetycznego płytki.
 Bezpośrednia ocena emisji zakłóceń wymagałaby zewnętrznego symulatora pola
 albo pomiarów fizycznych wykonanych płytek. Z~tego powodu w~badaniach
@@ -349,10 +585,12 @@ z~powszechnie stosowanymi zaleceniami projektowania pod kątem EMC:
   \item pole pętli tworzonej przez ścieżkę sygnałową i~ścieżkę powrotną
     masy --- miara emisji promieniowanej.
 \end{itemize}
-% openEMS; uzupełnić bibliografię o źródło zaleceń EMC.
 
 \section{Modyfikacje kodu źródłowego}
 \label{sec:modyfikacje}
+
+\subsection{Unet-Astar}
+\label{sec:modyfikacje-unet}
 
 Kod repozytorium Unet-Astar w~udostępnionej postaci nie umożliwiał
 przeprowadzenia badań bez zmian. Wprowadzono następujące modyfikacje:
@@ -374,8 +612,29 @@ przeprowadzenia badań bez zmian. Wprowadzono następujące modyfikacje:
     importowanego przez EasyEDA.
 \end{itemize}
 
+\subsection{RL\_PCB}
+\label{sec:modyfikacje-rlpcb}
+
+Repozytorium RL\_PCB korzysta z~trzech zewnętrznych narzędzi autora
+metody: konwertera plików KiCad, programu rozmieszczania metodą
+symulowanego wyżarzania oraz trasownika. W~czasie badań serwer, z~którego
+są pobierane, był niedostępny. Wprowadzono następujące zmiany:
+\begin{itemize}
+  \item przygotowano własny konwerter plików KiCad do formatu RL\_PCB
+    i~z~powrotem (sekcja~\ref{sec:format-rozmieszczanie});
+  \item poprawiono zamienione osie w~siatkach obserwacji modułu
+    rysującego płytkę --- dla płytek niekwadratowych obserwacje zawierały
+    wartości nieokreślone, co uniemożliwiało działanie polityki;
+  \item dodano skrypt uruchamiający wytrenowaną politykę dla wskazanej
+    płytki oraz skrypt diagnostyczny sprawdzający poprawność obserwacji
+    agentów.
+\end{itemize}
+
 \section{Ograniczenia}
 \label{sec:ograniczenia}
+
+\subsection{Trasowanie}
+\label{sec:ograniczenia-trasowanie}
 
 \begin{itemize}
   \item Trasowanie odbywa się na siatce 8~mil, a~reguły projektowe są
@@ -389,4 +648,22 @@ przeprowadzenia badań bez zmian. Wprowadzono następujące modyfikacje:
   \item Czasy działania zmierzone dla implementacji w~języku Python nie są
     porównywalne z~czasem działania autoroutera EasyEDA. Dlatego jako
     podstawową miarę wydajności przyjęto liczbę rozwiniętych węzłów.
+\end{itemize}
+
+\subsection{Rozmieszczanie elementów}
+\label{sec:ograniczenia-rozmieszczanie}
+
+\begin{itemize}
+  \item Polityka uczona była na jednej płytce $20 \times 20$~mm
+    z~czterema elementami, znacznie mniejszej i~prostszej od płytek
+    testowych.
+  \item Metoda wymaga dokładnie jednego elementu zablokowanego,
+    umieszczanego na środku płytki, co narzuca układ całego
+    rozmieszczenia.
+  \item Elementy mogą być obracane wyłącznie o~wielokrotność~90° i~tylko
+    po jednej stronie płytki.
+  \item Sieci zasilania są pomijane w~obserwacji i~w~nagrodzie.
+  \item Ze względu na niedostępność narzędzi autora metody nie porównano
+    wyników z~rozmieszczeniem metodą symulowanego wyżarzania, stosowanym
+    w~pracy źródłowej jako punkt odniesienia.
 \end{itemize}

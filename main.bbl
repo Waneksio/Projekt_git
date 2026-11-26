@@ -1,5 +1,12 @@
 \begin{thebibliography}{10}
 
+\bibitem{Cheng2021DeepPR}
+Ruoyu Cheng and Junchi Yan.
+\newblock On joint learning for solving placement and routing in chip design.
+\newblock In {\em Advances in Neural Information Processing Systems 34 (NeurIPS
+  2021)}, 2021.
+\newblock \url{https://arxiv.org/abs/2111.00234}.
+
 \bibitem{EasyEDA_ProjectSample}
 {EasyEDA}.
 \newblock Project-sample.
@@ -20,6 +27,21 @@ Firesuiry.
 \newblock GitHub,
   \url{https://github.com/Firesuiry/Unet-Astar-For-PCB-Routing}.
 
+\bibitem{Fujimoto2018TD3}
+Scott Fujimoto, Herke van Hoof, and David Meger.
+\newblock Addressing function approximation error in actor-critic methods.
+\newblock In {\em Proceedings of the 35th International Conference on Machine
+  Learning (ICML)}, volume~80 of {\em Proceedings of Machine Learning
+  Research}, pages 1587--1596, 2018.
+\newblock \url{https://arxiv.org/abs/1802.09477}.
+
+\bibitem{Gora_ProjektowaniePCB}
+Grzegorz Góra.
+\newblock Projektowanie {PCB} --- materiały do wykładu.
+\newblock Katedra Robotyki i~Mechatroniki, Akademia Górniczo-Hutnicza im.
+  Stanisława Staszica w~Krakowie,
+  \url{https://home.agh.edu.pl/~ggora/lectures/ProjektowaniePCB.pdf}, 2024.
+
 \bibitem{Lee1961}
 C.~Y. Lee.
 \newblock An algorithm for path connections and its applications.
@@ -38,6 +60,18 @@ Ting-Chou Lin, Devon~J. Merrill, Yen-Yi Wu, Chester Holtz, and Chung-Kuan
 Keiron O'Shea and Ryan Nash.
 \newblock An introduction to convolutional neural networks.
 \newblock arXiv:1511.08458, \url{https://arxiv.org/abs/1511.08458}, 2015.
+
+\bibitem{Rak2013RL}
+Andrzej Rak.
+\newblock Zastosowanie algorytmów uczenia przez wzmacnianie w~układzie
+  wyznaczania trajektorii zadanej manewrującego statku.
+\newblock {\em Zeszyty Naukowe Akademii Morskiej w~Gdyni}, (78):86--96, 2013.
+\newblock \url{https://sj.umg.edu.pl/sites/default/files/ZN190.pdf}.
+
+\bibitem{Sutton2018RL}
+Richard~S. Sutton and Andrew~G. Barto.
+\newblock {\em Reinforcement Learning: An Introduction}.
+\newblock MIT Press, Cambridge, MA, 2 edition, 2018.
 
 \bibitem{KiCad_PCBEditor_BasicConcepts}
 {The KiCad Documentation Contributors}.

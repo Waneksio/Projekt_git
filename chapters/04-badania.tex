@@ -1,14 +1,20 @@
 \chapter{Badania}
 \label{ch:badania}
 
-W~rozdziale opisano przebieg eksperymentu przeprowadzonego zgodnie
-z~metodyką przedstawioną w~rozdziale~\ref{ch:rozwiniecie}. Kolejne etapy,
-wykorzystywane w~nich narzędzia oraz ich wyniki zestawiono
-w~tabeli~\ref{tab:etapy}. Uzyskane wyniki omówiono
-w~rozdziale~\ref{ch:wyniki}.
+W~rozdziale opisano przebieg eksperymentów przeprowadzonych zgodnie
+z~metodyką przedstawioną w~rozdziale~\ref{ch:rozwiniecie}: badań
+trasowania (sekcja~\ref{sec:exp-trasowanie}) oraz badań rozmieszczania
+elementów (sekcja~\ref{sec:exp-rozmieszczanie}). Uzyskane wyniki
+omówiono w~rozdziale~\ref{ch:wyniki}.
+
+\section{Trasowanie}
+\label{sec:exp-trasowanie}
+
+Kolejne etapy eksperymentu trasowania, wykorzystywane w~nich narzędzia
+oraz ich wyniki zestawiono w~tabeli~\ref{tab:etapy}.
 
 \begin{table}[ht]
-\fcmtcaption{Etapy eksperymentu. Źródło: opracowanie własne.}\label{tab:etapy}
+\fcmtcaption{Etapy eksperymentu trasowania. Źródło: opracowanie własne.}\label{tab:etapy}
 \centering\footnotesize%
 \begin{tabular}{p{0.04\textwidth} p{0.33\textwidth} p{0.2\textwidth} p{0.3\textwidth}}
 \toprule
@@ -37,7 +43,7 @@ Lp. & Etap & Narzędzie & Wynik \\
 \end{tabular}
 \end{table}
 
-\section{Przygotowanie sieci neuronowej}
+\subsection{Przygotowanie sieci neuronowej}
 \label{sec:exp-trening}
 
 Zbiór uczący wygenerowano zgodnie z~opisem w~sekcji~\ref{sec:zbior-uczacy}.
@@ -57,21 +63,24 @@ osiągnięto w~ostatniej, 15.~epoce. Oznacza to, że dłuższy trening mógłby
 jeszcze nieznacznie poprawić model.
 Przebieg funkcji straty przedstawiono w~rozdziale~\ref{ch:wyniki}.
 
-\section{Przygotowanie płytek testowych}
+\subsection{Przygotowanie płytek testowych}
 \label{sec:exp-plytki}
 
 Płytki testowe utworzono w~EasyEDA na podstawie dwóch rodzajów schematów:
 \begin{itemize}
-  \item schematów własnych,
-  \item schematu publicznego projektu przykładowego \emph{Project-Sample},
-    udostępnionego w~sekcji \emph{Modules} serwisu
-    EasyEDA~\cite{EasyEDA_ProjectSample}.
+  \item płytki własne: płytka z~diodą LED,
+  \item płytki z~serwisu EasyEDA: projekt przykładowy \emph{Project-Sample}
+    oraz moduły PT4115, CKT-4 i~L7815-regulator, udostępnione publicznie
+    w~sekcji \emph{Modules} serwisu EasyEDA~\cite{EasyEDA_ProjectSample}.
 \end{itemize}
 
 Dla każdego schematu wygenerowano w~EasyEDA płytkę PCB, na której
 umieszczono footprinty elementów wraz z~siecią połączeń. Następnie
-wyznaczono prostokątny obrys płytki i~rozmieszczono elementy
-ręcznie. Rozmieszczenie elementów nie było zmieniane w~dalszych etapach, 
+wyznaczono prostokątny obrys płytki. Przy konwersji schematu na płytkę
+edytor EasyEDA proponuje wstępne rozmieszczenie elementów, które jednak
+nie uwzględnia obrysu płytki. Tam, gdzie było to możliwe, zachowano to
+rozmieszczenie, a~pojedyncze elementy przesunięto ręcznie tak, aby
+mieściły się w~obrysie. Rozmieszczenie elementów nie było zmieniane w~dalszych etapach, 
 dlatego wszystkie warianty trasowania otrzymują identyczne położenia padów. 
 Płytki spełniają wymagania podane w~sekcji~\ref{sec:zbior-testowy}:
 mają dwie warstwy miedzi, prostokątny obrys i~nie zawierają 
@@ -112,19 +121,27 @@ Płytka & Pochodzenie & Wymiary [mm] & Elementy & Sieci & Połączenia \\
 \midrule
 Płytka z~diodą LED & własna & $51 \times 34$ & 4 & 4 & 4 \\
 \midrule
-Płytka przykładowa & publiczna & $37 \times 25$ & 8 & 6 & 16 \\
+Płytka przykładowa & EasyEDA & $37 \times 25$ & 8 & 6 & 12 \\
+\midrule
+Płytka modułu PT4115 & EasyEDA & $34{,}5 \times 23{,}1$ & 8 & 6 & 14 \\
+\midrule
+Płytka CKT~4 & EasyEDA & $34 \times 23$ & 11 & 10 & 18 \\
+\midrule
+Płytka stabilizatora L7815 & EasyEDA & $63 \times 42$ & 7 & 3 & 12 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Kolumna \emph{Połączenia} podaje liczbę połączeń dwupinowych, na które
 program Unet-Astar dzieli sieci wielopinowe. Odpowiada ona liczbie
-zadań wyszukiwania ścieżki wykonywanych przez algorytm A*. Na płytce
-przykładowej jedna z~sześciu sieci ma tylko jeden pin, więc nie wymaga
-poprowadzenia. Pozostałe pięć sieci, w~tym ośmiopinowa sieć zasilania
-+24~V, daje łącznie 16~połączeń.
+zadań wyszukiwania ścieżki wykonywanych przez algorytm A*. Sieć
+o~$n$~pinach daje $n-1$~połączeń. Na płytce przykładowej najwięcej
+połączeń daje siedmiopinowa sieć R3\_2. Na płytce modułu PT4115 jedna
+z~sześciu sieci (DIM1) ma tylko jeden pin, więc nie wymaga poprowadzenia.
+Pozostałe pięć sieci, w~tym ośmiopinowa sieć zasilania +24~V, daje łącznie
+14~połączeń.
 
-\section{Trasowanie autorouterem EasyEDA}
+\subsection{Trasowanie autorouterem EasyEDA}
 \label{sec:exp-autorouter}
 
 Każdą płytkę testową poprowadzono autorouterem wbudowanym w~EasyEDA
@@ -138,7 +155,7 @@ Dla każdej płytki zanotowano, czy autorouter poprowadził wszystkie
 połączenia. EasyEDA nie podaje czasu działania autoroutera, dlatego czasu
 trasowania tego wariantu nie mierzono.
 
-\section{Eksport plików DSN}
+\subsection{Eksport plików DSN}
 \label{sec:exp-dsn}
 
 Płytki wyeksportowano z~EasyEDA do plików w~formacie \emph{Specctra DSN}
@@ -148,7 +165,7 @@ również ścieżki poprowadzone przez autorouter (sekcja \emph{wiring}). Progra
 Unet-Astar pomija tę sekcję, więc warianty \emph{A*} i~\emph{Unet-A*}
 trasują płytkę od początku, a~wynik autoroutera nie wpływa na ich działanie.
 
-\section{Trasowanie programem Unet-Astar}
+\subsection{Trasowanie programem Unet-Astar}
 \label{sec:exp-unet-astar}
 
 Na podstawie każdego pliku DSN płytkę poprowadzono w~dwóch wariantach:
@@ -179,7 +196,7 @@ w~sposób identyczny jak dla zbioru uczącego. Posłużyły one do wyznaczenia
 miar Dice i~IoU (tabela~\ref{tab:miary}), opisujących jakość predykcji sieci
 na płytkach rzeczywistych.
 
-\section{Eksport ścieżek}
+\subsection{Eksport ścieżek}
 \label{sec:exp-ses}
 
 Ścieżki wyznaczone w~wariantach \emph{A*} i~\emph{Unet-A*} zapisano
@@ -188,7 +205,7 @@ powstały dwa pliki \emph{Specctra SES}, po jednym dla każdego wariantu.
 Pliki odwołują się do pliku DSN, z~którego powstały, i~zawierają wyłącznie
 ścieżki i~przelotki --- położenia elementów pozostają bez zmian.
 
-\section{Naniesienie wyników na płytki w~EasyEDA}
+\subsection{Naniesienie wyników na płytki w~EasyEDA}
 \label{sec:exp-import}
 
 W~EasyEDA każdą płytkę testową sklonowano dwukrotnie, osobno dla wariantu
@@ -200,18 +217,21 @@ różniące się wyłącznie poprowadzeniem ścieżek. Zaimportowane płytki
 porównano wizualnie z~wynikiem programu Unet-Astar, aby wykluczyć błędy
 przeliczenia współrzędnych.
 
-\section{Odczyt parametrów płytek}
+\subsection{Odczyt parametrów płytek}
 \label{sec:exp-odczyt}
 
 Dla każdego z~trzech projektów płytki odczytano w~EasyEDA:
 \begin{itemize}
   \item łączną długość ścieżek,
   \item liczbę przelotek,
-  \item liczbę niepoprowadzonych połączeń,
+  \item liczbę połączonych sieci,
   \item liczbę i~rodzaje naruszeń reguł projektowych zgłoszonych przez
     DRC.
 \end{itemize}
-% TODO: nazwa funkcji / okna EasyEDA, z którego odczytywane są parametry.
+Liczbę połączonych sieci, łączną długość ścieżek i~liczbę przelotek
+odczytano z~okna informacji o~płytce, otwieranego z~menu
+\emph{Fabrication} $\rightarrow$ \emph{PCB Information\ldots}, a~naruszenia
+reguł projektowych z~raportu DRC.
 Parametry jakości trasowania odczytano tym samym narzędziem dla wszystkich
 wariantów. Dzięki temu nie zależą one od sposobu liczenia długości ścieżek
 w~programie Unet-Astar, który posługuje się siatką o~boku 8~mil.
@@ -219,7 +239,7 @@ Miary wydajności wyszukiwania (liczba rozwiniętych węzłów, czas) pochodzą
 z~programu Unet-Astar i~dotyczą wyłącznie wariantów \emph{A*}
 i~\emph{Unet-A*}.
 
-\section{Zestawienie wyników}
+\subsection{Zestawienie wyników}
 \label{sec:exp-zestawienie}
 
 Parametry odczytane dla wszystkich płytek i~wariantów zestawiono w~tabelach
@@ -228,3 +248,119 @@ porównawczych. Dla każdej płytki porównano warianty \emph{EasyEDA},
 \emph{A*} i~\emph{Unet-A*} --- dodatkowo pod względem liczby rozwiniętych
 węzłów i~czasu wyszukiwania. Wyniki zagregowano również dla całego zbioru
 testowego. Wyniki przedstawiono i~omówiono w~rozdziale~\ref{ch:wyniki}.
+
+\section{Rozmieszczanie elementów}
+\label{sec:exp-rozmieszczanie}
+
+Badania rozmieszczania przeprowadzono na płytkach testowych z~badań
+trasowania (sekcja~\ref{sec:exp-plytki}), zgodnie z~przebiegiem opisanym
+w~sekcji~\ref{sec:przebieg-rozmieszczanie}. Kolejne etapy, wykorzystywane
+w~nich narzędzia oraz ich wyniki zestawiono w~tabeli~\ref{tab:etapy-rl}.
+
+\begin{table}[ht]
+\fcmtcaption{Etapy eksperymentu rozmieszczania. Źródło: opracowanie własne.}\label{tab:etapy-rl}
+\centering\footnotesize%
+\begin{tabular}{p{0.04\textwidth} p{0.33\textwidth} p{0.2\textwidth} p{0.3\textwidth}}
+\toprule
+Lp. & Etap & Narzędzie & Wynik \\
+\midrule
+1 & Usunięcie ścieżek i~eksport płytek do formatu JSON & EasyEDA & pliki JSON \\
+\midrule
+2 & Import płytek i~zapis w~formacie KiCad & KiCad & pliki \texttt{.kicad\_pcb} \\
+\midrule
+3 & Konwersja płytek do formatu RL\_PCB & konwerter własny & pliki \texttt{.pcb} \\
+\midrule
+4 & Trening polityki & RL\_PCB & wagi aktora i~krytyka \\
+\midrule
+5 & Uruchomienie polityki na płytkach testowych & RL\_PCB & wariant \emph{RL\_PCB}
+  w~formacie \texttt{.pcb} \\
+\midrule
+6 & Konwersja wyników do formatu KiCad & konwerter własny & pliki \texttt{.kicad\_pcb} \\
+\midrule
+7 & Wczytanie płytek w~edytorze i~walidacja & KiCad & miary dopuszczalności
+  i~jakości rozmieszczenia \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Eksport płytek z~EasyEDA}
+\label{sec:exp-rl-eksport}
+
+Punktem wyjścia były płytki testowe z~ręcznym rozmieszczeniem elementów,
+przygotowane w~EasyEDA w~badaniach trasowania. Każdą płytkę sklonowano, a~z~kopii
+usunięto wszystkie ścieżki i~przelotki, pozostawiając elementy, obrys
+płytki i~sieci połączeń. Ścieżki nie są potrzebne do wyznaczenia
+rozmieszczenia, a~po przesunięciu elementów i~tak tracą sens. Następnie
+płytki wyeksportowano do formatu źródłowego EasyEDA, czyli pliku JSON.
+
+\subsection{Import płytek do programu KiCad}
+\label{sec:exp-rl-kicad}
+
+Pliki JSON zaimportowano w~edytorze płytek KiCad poleceniem
+\emph{Importuj płytkę spoza programu KiCad}
+(sekcja~\ref{sec:format-rozmieszczanie}), a~następnie zapisano w~formacie
+\texttt{.kicad\_pcb}. Po imporcie sprawdzono, czy płytka zawiera wszystkie
+elementy i~sieci oraz czy jej obrys jest prostokątny. Zaimportowane
+płytki z~ręcznym rozmieszczeniem stanowią wariant odniesienia
+\emph{Ręczny}.
+
+\subsection{Konwersja płytek do formatu RL\_PCB}
+\label{sec:exp-rl-konwersja}
+
+Pliki \texttt{.kicad\_pcb} przekształcono do formatu wejściowego RL\_PCB
+konwerterem opisanym w~sekcji~\ref{sec:format-rozmieszczanie}
+(polecenie \texttt{to-pcb}). Elementem zablokowanym był na każdej płytce
+element największy, przeniesiony przez konwerter na środek płytki. Obok
+pliku \texttt{.pcb} konwerter zapisuje plik pomocniczy JSON z~przesunięciem
+współrzędnych i~przypisaniem elementów, wykorzystywany przy konwersji
+odwrotnej.
+
+\subsection{Trening polityki}
+\label{sec:exp-rl-trening}
+
+Politykę wytrenowano algorytmem TD3 z~parametrami podanymi
+w~tabeli~\ref{tab:trening-rl} (sekcja~\ref{sec:trening-rozmieszczanie}).
+Trening prowadzono na płytce uczącej z~zestawu danych repozytorium RL\_PCB,
+więc nie zależał on od płytek testowych. Przeprowadzono dwa przebiegi,
+uruchomione równolegle na karcie graficznej, które trwały łącznie ok.~8~h.
+Do dalszych badań wybrano model, który osiągnął największy zwrot
+w~trakcie treningu.
+
+\subsection{Rozmieszczenie płytek testowych}
+\label{sec:exp-rl-polityka}
+
+Wytrenowaną politykę uruchomiono na każdej płytce testowej w~formacie
+\texttt{.pcb}. Wykorzystano przy tym wyłącznie sieć aktora, która dla
+każdego elementu niezablokowanego wyznacza kolejne przesunięcia
+i~obroty. Epizod miał 200~kroków, a~dla płytki przykładowej i~płytki
+L7815 limit zwiększono do 300~kroków.
+Wynikiem jest plik \texttt{.pcb} z~nowymi położeniami
+i~orientacjami elementów, stanowiący wariant \emph{RL\_PCB}.
+
+\subsection{Konwersja wyników i~walidacja}
+\label{sec:exp-rl-walidacja}
+
+Wyniki przekształcono z~powrotem do formatu KiCad tym samym konwerterem
+(polecenie \texttt{to-kicad}). Nowe położenia i~orientacje elementów
+wpisano do kopii pliku \texttt{.kicad\_pcb}, z~którego powstała dana
+płytka, dzięki czemu footprinty, sieci i~obrys pozostały bez zmian.
+Płytki wariantu \emph{RL\_PCB} wczytano w~edytorze płytek KiCad
+i~porównano wizualnie z~wynikiem programu RL\_PCB, aby wykluczyć błędy
+przeliczenia współrzędnych.
+
+Następnie dla obu wariantów rozmieszczenia wyznaczono miary
+z~tabeli~\ref{tab:miary-rl}. Dopuszczalność oceniono za pomocą DRC
+programu KiCad, które zgłasza nakładanie się obrysów montażowych,
+naruszenia minimalnych odstępów i~elementy wystające poza obrys płytki.
+HPWL wyznaczono dla wszystkich wariantów tym samym skryptem
+\texttt{tools/hpwl.py}, który odczytuje z~pliku \texttt{.kicad\_pcb}
+pady wraz z~ich siecią i~położeniem (\texttt{at}). Położenie padu jest
+w~pliku podane względem footprintu, dlatego skrypt obraca je o~kąt
+footprintu i~przesuwa o~jego położenie. Dla każdej sieci wyznaczany jest
+półobwód prostokąta otaczającego jej pady, a~wyniki są sumowane. Skrypt
+podaje HPWL dla wszystkich sieci oraz, z~opcją
+\texttt{-{}-ignore\_power}, bez sieci zasilania, tak jak liczy je
+program RL\_PCB.
+% TODO: sposób wyznaczenia pola prostokąta otaczającego elementy.
+Miary jakości wyznaczono dla obu wariantów w~ten sam sposób. Wyniki przedstawiono
+i~omówiono w~rozdziale~\ref{ch:wyniki}.

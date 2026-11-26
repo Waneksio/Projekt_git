@@ -3,51 +3,139 @@
 
 \section{Skuteczność trasowania}
 
-Dla większości płytek rozwiązania wyznaczone algorytmami \emph{A*}
-i~\emph{Unet-Astar} były gorsze od wyników autoroutera dostępnego w~edytorze
-\emph{EasyEDA}. Ze względu na postać funkcji celu bazowa wersja algorytmu
-\emph{A*} umieszczała na płytce wiele przelotek. Wersja wspomagana siecią
-neuronową w~dużej mierze wyeliminowała ten problem. Ze względu na sposób
-modelowania problemu nadal jednak proponowała ścieżki z~wieloma
-załamaniami, co zwiększało ich łączną długość. Widoczne są też skutki
-zaokrąglania reguł projektowych do oczek siatki. W~niektórych miejscach
-algorytm \emph{A*} nie był w~stanie poprowadzić ścieżki, podczas gdy
-wbudowany autorouter radził sobie z~tym bez trudu.
+Na większości płytek trasowanie wyznaczone algorytmami \emph{A*}
+i~\emph{Unet-A*} było gorsze od wyniku autoroutera edytora EasyEDA.
+Ścieżki poprowadzone algorytmem \emph{A*} były o~8--25\% dłuższe niż
+w~wariancie EasyEDA (pomijając płytkę przykładową, na której autorouter
+nie poprowadził wszystkich sieci) i~wymagały od 14 do 27~przelotek,
+podczas gdy autorouter na większości płytek nie użył ich wcale. Wynika
+to z~postaci funkcji celu algorytmu \emph{A*}. Wersja wspomagana siecią neuronową w~dużej mierze
+wyeliminowała ten problem: na płytkach z~diodą LED, CKT~4 i~L7815
+liczba przelotek spadła do 0--3. Łączna długość ścieżek \emph{Unet-A*} była też
+na wszystkich płytkach mniejsza niż w~wariancie \emph{A*}, choć na
+dwóch z~nich brakowało jednego połączenia. Nadal jednak
+zawierały wiele załamań, co zwiększało ich łączną długość
+w~porównaniu z~wariantem EasyEDA. Widoczne są też skutki zaokrąglania
+reguł projektowych do całkowitej liczby oczek siatki.
 
-Badania wykazały jednak, że zdarzają się przypadki, w~których autorouter
-nie poprowadził wszystkich połączeń, a~algorytm \emph{A*} --- zarówno
-w~wersji podstawowej, jak i~z~obszarami rekomendowanymi wyznaczanymi przez
-sieć konwolucyjną --- poprowadził je w~całości.
+Algorytm \emph{Unet-A*} nie poprowadził wszystkich połączeń na płytkach
+PT4115 i~CKT~4. Na tych samych płytkach nie powiodło się również
+kontrolne wyszukiwanie \emph{A*} uruchomione na tym samym stanie
+płytki, więc przyczyną było zablokowanie drogi przez wcześniej
+poprowadzone ścieżki, a~nie zawężenie obszaru wyszukiwania przez sieć.
+Kolejność prowadzenia połączeń ma więc istotny wpływ na wynik.
+
+Zdarzały się jednak także przypadki odwrotne. Na płytce przykładowej
+autorouter EasyEDA nie poprowadził dwóch z~sześciu sieci, a~algorytm
+\emph{A*}, zarówno w~wersji podstawowej, jak i~z~obszarami
+rekomendowanymi wyznaczanymi przez sieć konwolucyjną, poprowadził
+wszystkie połączenia bez naruszeń reguł projektowych.
 
 \section{Czas trasowania}
 
-Przeprowadzony eksperyment wykazał, że wyznaczanie obszarów rekomendowanych
-przez konwolucyjną sieć neuronową znacznie przyspiesza trasowanie
-w~porównaniu z~samym algorytmem \emph{A*}. \emph{EasyEDA} nie podaje
-wprost czasu trasowania, jednak jest on rzędu kilku sekund, a~więc zbliżony
-do czasu działania \emph{Unet-Astar}. Czasów tych nie można jednak
-bezpośrednio porównać, ponieważ edytor działający w~przeglądarce wykonuje
-obliczenia w~chmurze.
+Wyznaczanie obszarów rekomendowanych przez konwolucyjną sieć neuronową
+znacznie przyspiesza trasowanie w~porównaniu z~samym algorytmem
+\emph{A*}. Na badanych płytkach czas trasowania skrócił się od 2,5 do
+prawie 8~razy, a~liczba rozwiniętych węzłów spadła o~49--72\%.
+Największy zysk uzyskano na największej płytce (L7815), na której
+trasowanie skróciło się z~60,5 do 7,7~s. EasyEDA nie podaje wprost czasu
+trasowania, ale jest on rzędu kilku sekund, a~więc zbliżony do czasu
+działania \emph{Unet-A*}. Czasów tych nie można jednak bezpośrednio
+porównać, ponieważ edytor działający w~przeglądarce wykonuje obliczenia
+na serwerze.
 
 \section{Kierunki dalszych prac w~zakresie trasowania}
 
-W~obecnej implementacji \emph{Unet-Astar} nie stanowi jeszcze
-pełnowartościowej alternatywy dla autoroutera \emph{EasyEDA}. Uzyskane
-wyniki wskazują jednak, że rozwiązania oparte na sztucznej inteligencji mają
+W~obecnej implementacji program Unet-Astar nie stanowi jeszcze
+pełnowartościowej alternatywy dla autoroutera EasyEDA. Uzyskane wyniki
+wskazują jednak, że rozwiązania oparte na sztucznej inteligencji mają
 potencjał, by w~przyszłości dorównać klasycznym metodom heurystycznym,
 a~nawet je wyprzedzić.
 
-Przewidywanie obszarów rekomendowanych przez sieć konwolucyjną okazało się
-korzystne nie tylko pod względem czasu działania, lecz także jakości
+Przewidywanie obszarów rekomendowanych przez sieć konwolucyjną okazało
+się korzystne nie tylko pod względem czasu działania, lecz także jakości
 wyników. Naturalnym rozwinięciem tej metody byłoby wykorzystanie jako
-danych uczących ścieżek wyznaczonych algorytmem \emph{A*} zamiast obszarów
-wyznaczanych algorytmem Lee.
+danych uczących ścieżek wyznaczonych algorytmem \emph{A*} zamiast
+obszarów wyznaczanych algorytmem Lee.
 
 Dalszego rozwoju wymaga również implementacja algorytmu \emph{A*}
-wykorzystana w~programie. Należy przede wszystkim zmodyfikować funkcję celu
-i~systematycznie zbadać wpływ parametrów na wynik algorytmu. Szczególną
-uwagę warto zwrócić na zwiększenie kary za nieregularny kształt ścieżki.
+wykorzystana w~programie. Należy przede wszystkim zmodyfikować funkcję
+celu i~systematycznie zbadać wpływ jej parametrów na wynik trasowania.
+Szczególną uwagę warto zwrócić na zwiększenie kary za załamania ścieżki
+i~zmiany warstwy. Warto też zbadać wpływ kolejności prowadzenia połączeń
+oraz możliwość ponownego prowadzenia połączeń, które zablokowały inne.
 
-% Wygodny format eksportu danych z~narzędzia bardzo ułatwia integrację z~różnymi solverami.
-% Dobrym kierunkiem ułatwiającym dalsze prace byłaby automatyzacja importu.
-% TODO: podsumowanie i interpretacja wyników, odniesienie do celu pracy, kierunki dalszych prac.
+W~dalszych badaniach przydatna może okazać się także walidacja wyników
+za pomocą symulacji pola elektromagnetycznego, dostępnej w~istniejących
+programach. Pozwoliłoby to rzetelniej ocenić wyznaczone ścieżki niż
+same miary geometryczne.
+
+\section{Skuteczność rozmieszczania elementów}
+
+Rozmieszczanie elementów programem RL\_PCB okazało się pod wieloma
+względami problematyczne. Choć wartości HPWL świadczyły na jego
+korzyść, a~na płytkach PT4115 i~przykładowej HPWL spadło o~ok.~31\%
+względem EasyEDA, to tylko na płytce z~diodą LED otrzymano
+rozmieszczenie dopuszczalne. Na płytkach przykładowej i~PT4115 elementy
+nachodziły na siebie, a~na płytce PT4115 jeden z~elementów wystawał
+poza obrys płytki. Na płytkach CKT~4 i~L7815 polityka nie wyznaczyła
+żadnego rozmieszczenia spełniającego nawet złagodzony próg nakładania.
+W~edytorach płytek nawet niewielkie nałożenie się padów lub
+niezachowanie minimalnego odstępu od krawędzi jest błędem DRC, który
+wyklucza płytkę z~produkcji.
+
+Prawdopodobnych przyczyn jest kilka. Politykę wytrenowano na jednej
+płytce uczącej o~wymiarach $20 \times 20$~mm z~czterema małymi
+elementami SMD. Płytka z~diodą LED, jedyna z~dopuszczalnym wynikiem, ma
+również cztery elementy, natomiast pozostałe płytki testowe mają ich
+więcej, zawierają duże elementy przewlekane lub są większe. Funkcja
+nagrody słabo karała nakładanie się elementów (waga 2), a~silnie
+nagradzała obniżenie HPWL (waga 6). W~efekcie elementy połączone
+wspólnymi sieciami przyciągały się do siebie i~nachodziły na siebie.
+Obrys płytki nie był ograniczeniem twardym, a~wyjście poza niego karano
+tak samo słabo jak nakładanie. Elementy połączone wyłącznie z~sieciami
+zasilania, które RL\_PCB pomija, nie były przyciągane do żadnej grupy
+i~mogły odsuwać się aż do krawędzi płytki. Dodatkowo agenci działali
+lokalnie i~niezależnie od siebie. W~połączeniu z~zablokowaniem
+największego elementu w~pobliżu środka płytki ograniczało to przestrzeń
+przeszukiwanych rozwiązań.
+
+Wyniki programu RL\_PCB nie mogą być przyjmowane bez sprawdzenia
+w~edytorze płytek. Skrypt oceniający zapisał rozmieszczenie płytki
+PT4115 jako wolne od nakładania, ponieważ w~ostatnim kroku epizodu
+sprawdzał tylko jeden element.
+
+\section{Czas rozmieszczania elementów}
+
+W~zależności od liczby elementów na płytce rozmieszczanie trwało od
+kilkunastu do kilkudziesięciu sekund. Trudno jednak wskazać punkt
+odniesienia. W~badaniach nie porównywano RL\_PCB z~narzędziami do
+automatycznego rozmieszczania innych programów, a~czas ręcznego
+rozmieszczania elementów zależy przede wszystkim od doświadczenia
+projektanta.
+
+\section{Kierunki dalszych prac w~zakresie rozmieszczania elementów}
+
+Rozmieszczenia proponowane przez politykę RL\_PCB były dalekie od
+optymalnych, ale przeprowadzone badania nie wykluczają uczenia ze
+wzmocnieniem jako narzędzia do rozwiązywania problemu rozmieszczania.
+Wskazują jednak, że zastosowane podejście wymaga znaczących zmian na
+wielu płaszczyznach.
+
+Trening powinien obejmować więcej płytek o~różnych rozmiarach,
+zagęszczeniu padów i~rodzajach elementów. Ponownego przemyślenia wymaga
+też funkcja nagrody. Staranne dobranie wag mogłoby rozwiązać wiele
+problemów, które pojawiły się w~badaniach. Nakładanie się elementów
+i~wyjście poza obrys płytki powinny być traktowane jako ograniczenia
+twarde, a~elementy połączone tylko z~sieciami zasilania powinny być
+przyciągane do elementów, z~którymi współpracują.
+
+Dobrym kierunkiem dalszych prac jest też koordynacja agentów, tak aby
+każdy z~nich uwzględniał wpływ swojego ruchu na pozostałe elementy.
+
+Przy dostępności dobrego programu do trasowania można połączyć oba
+etapy projektowania, tak aby wynik trasowania był częścią odpowiedzi
+środowiska na działanie agenta. Ponieważ pełne trasowanie w~każdym
+kroku byłoby kosztowne, można je zastąpić siecią neuronową
+przewidującą jakość trasowania dla danego rozmieszczenia.
+

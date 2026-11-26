@@ -1,8 +1,6 @@
 \chapter{Wyniki}
 \label{ch:wyniki}
 
-% TODO: prezentacja i omówienie wyników przeprowadzonych badań.
-
 \section{Płytka z~diodą LED}
 \label{sec:wyniki-led}
 
@@ -142,8 +140,8 @@ o~1,9\% mniej niż w~wariancie A*, ale o~58\% więcej niż w~wariancie EasyEDA.
 Tę ostatnią różnicę należy jednak interpretować ostrożnie, ponieważ wariant
 EasyEDA nie zawiera dwóch sieci. Kształt ścieżek jest podobny jak
 w~wariancie A*: występują drobne załamania wynikające z~prowadzenia po
-siatce. Trasowanie trwało 3,1~s wobec 16,6~s dla A*, a~liczba rozwiniętych
-węzłów spadła ze 160\,493 do 45\,516, czyli o~72\%.
+siatce. Trasowanie trwało 2,1~s wobec 11,1~s dla A*, a~liczba rozwiniętych
+węzłów spadła ze 129\,271 do 36\,130, czyli o~72\%.
 
 \begin{table}[ht]
 \fcmtcaption{Parametry płytki przykładowej EasyEDA w~badanych wariantach.
@@ -161,9 +159,380 @@ Liczba przelotek & 0 & 18 & 16 \\
 \midrule
 Naruszenia DRC & 2 & 0 & 0 \\
 \midrule
-Czas trasowania [s] & --- & 16,6 & 3,1 \\
+Czas trasowania [s] & --- & 11,1 & 2,1 \\
 \midrule
-Rozwinięte węzły & --- & 160\,493 & 45\,516 \\
+Rozwinięte węzły & --- & 129\,271 & 36\,130 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\section{Płytka modułu PT4115}
+\label{sec:wyniki-pt4115}
+
+Trzecia płytka testowa pochodzi z~projektu udostępnionego w~sekcji
+\emph{Modules} serwisu EasyEDA, opisanego jako moduł
+PT4115. Jest to
+sterownik diod LED zasilany napięciem 24~V. Płytka zawiera osiem
+elementów: złącze zasilania (J1), układ PT4115 (U1), dławik (L1), diodę
+(D1), dwa kondensatory (C1, C2) i~dwa rezystory (R1, R2). Elementy mają
+łącznie 20~padów, z~czego 12~to pady powierzchniowe (SMD), a~8~pady
+przewlekane (THT). Płytka ma wymiary $34{,}5 \times 23{,}1$~mm
+($1360 \times 910$~mil) i~dwie warstwy sygnałowe. Projekt zawiera sześć
+sieci, z~których jedna (DIM1) ma tylko jeden pin. Pozostałe pięć sieci,
+w~tym sieć zasilania +24~V, daje łącznie 14~połączeń dwupinowych.
+
+Wyniki trasowania przedstawiono na
+rysunkach~\ref{rys:pt4115-easyeda}--\ref{rys:pt4115-unet}, a~ich parametry
+zestawiono w~tabeli~\ref{tab:wyniki-pt4115}.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_SamplePCB2_2026-11-22}
+\caption{Płytka modułu PT4115 poprowadzona autorouterem EasyEDA. Źródło:
+opracowanie własne.}\label{rys:pt4115-easyeda}
+\end{figure}
+
+Autorouter EasyEDA poprowadził wszystkie sześć sieci, a~DRC nie wykazało
+naruszeń reguł projektowych. Większość ścieżek leży na warstwie górnej,
+a~zmiany warstwy wymagały tylko dwóch przelotek. Łączna długość ścieżek
+wynosi 191,10~mm (7523,61~mil).
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_PT4115Astar_2026-11-24}
+\caption{Płytka modułu PT4115 poprowadzona algorytmem A* bez sieci
+neuronowej. Źródło: opracowanie własne.}\label{rys:pt4115-astar}
+\end{figure}
+
+Algorytm A* poprowadził wszystkie sześć sieci (14 z~14~połączeń), a~DRC
+nie wykazało naruszeń reguł projektowych. Ścieżki prowadzone są na obu
+warstwach i~wymagały 27~przelotek, ponad trzynastokrotnie więcej niż
+w~wariancie EasyEDA. Łączna długość ścieżek wynosi 232,69~mm
+(9161,25~mil), czyli o~21,8\% więcej niż w~wariancie EasyEDA. Podobnie jak
+na pozostałych płytkach, ścieżki mają nieregularny przebieg z~wieloma
+drobnymi załamaniami. Trasowanie trwało 14,6~s, a~algorytm rozwinął
+161\,560~węzłów.
+
+Pierwsza próba trasowania tej płytki ujawniła pułapkę formatu DSN.
+Oryginalny projekt modułu zawierał dwie przelotki, które EasyEDA zapisało
+w~pliku DSN nie tylko w~sekcji istniejących połączeń (\emph{wiring}), lecz
+także jako piny z~padami na obu warstwach. Program Unet-Astar pomija
+sekcję \emph{wiring}, więc traktował te punkty jak pady przewlekane
+i~zmieniał w~nich warstwę ścieżki bez dodania przelotki. Po usunięciu
+oryginalnych przelotek z~płytki połączenie w~sieci +24~V między układem U1
+a~złączem J1 i~rezystorem R2 zostało przerwane. Dlatego płytkę
+wyeksportowano ponownie po usunięciu wszystkich ścieżek i~przelotek,
+a~przedstawione wyniki dotyczą tego pliku DSN.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_PT4115_UnetAstar_2026-11-24}
+\caption{Płytka modułu PT4115 poprowadzona algorytmem Unet-A*. Źródło:
+opracowanie własne.}\label{rys:pt4115-unet}
+\end{figure}
+
+Algorytm Unet-A* jako jedyny z~badanych wariantów nie wyznaczył ścieżek
+dla wszystkich połączeń: poprowadził 12 z~14~połączeń. W~EasyEDA
+połączonych jest pięć z~sześciu sieci, a~DRC wykazało dwa naruszenia
+reguł projektowych. Oba dotyczą tej samej niedokończonej sieci:
+brakuje połączeń U1--R1 i~R1--R2. Ścieżki prowadzone są na obu
+warstwach i~wymagały 14~przelotek. Łączna długość ścieżek wynosi
+182,21~mm (7173,52~mil). Jest to o~4,7\% mniej niż w~wariancie EasyEDA
+i~o~21,7\% mniej niż w~wariancie A*. Długość ta nie jest jednak
+porównywalna z~pozostałymi wariantami, ponieważ nie obejmuje
+niepoprowadzonych połączeń. Trasowanie trwało 2,9~s wobec 14,6~s dla A*,
+a~liczba rozwiniętych węzłów spadła ze 161\,560 do 50\,994, czyli
+o~68\%.
+
+\begin{table}[ht]
+\fcmtcaption{Parametry płytki modułu PT4115 w~badanych wariantach. Źródło:
+opracowanie własne.}\label{tab:wyniki-pt4115}
+\centering\footnotesize%
+\begin{tabular}{l r r r}
+\toprule
+Miara & EasyEDA & A* & Unet-A* \\
+\midrule
+Połączone sieci & 6/6 & 6/6 & 5/6 \\
+\midrule
+Długość ścieżek [mm] & 191,10 & 232,69 & 182,21 \\
+\midrule
+Liczba przelotek & 2 & 27 & 14 \\
+\midrule
+Naruszenia DRC & 0 & 0 & 2 \\
+\midrule
+Czas trasowania [s] & --- & 14,6 & 2,9 \\
+\midrule
+Rozwinięte węzły & --- & 161\,560 & 50\,994 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Płytka CKT~4}
+\label{sec:wyniki-ckt4}
+
+Czwarta płytka testowa, oznaczona jako CKT~4, pochodzi z~modułu
+udostępnionego w~sekcji \emph{Modules} serwisu
+EasyEDA. Zawiera wyłącznie elementy przewlekane
+(THT). Jest na niej 11~elementów: układ scalony w~obudowie
+DIP-8 (U1), tranzystor (Q1), cztery rezystory (R1, R2, R3, R5), trzy
+kondensatory (C1--C3), dioda LED (LED1) i~złącze zasilania (V1). Elementy
+mają łącznie 29~padów przewlekanych. Płytka ma wymiary $34 \times 23$~mm
+i~dwie warstwy sygnałowe. Projekt zawiera dziesięć sieci, które dają
+łącznie 18~połączeń dwupinowych.
+
+Wyniki trasowania przedstawiono na
+rysunkach~\ref{rys:ckt4-easyeda}--\ref{rys:ckt4-unet}, a~ich parametry
+zestawiono w~tabeli~\ref{tab:wyniki-ckt4}.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_CKT-4_2026-11-22}
+\caption{Płytka CKT~4 poprowadzona autorouterem EasyEDA. Źródło:
+opracowanie własne.}\label{rys:ckt4-easyeda}
+\end{figure}
+
+Autorouter EasyEDA poprowadził wszystkie dziesięć sieci bez użycia
+przelotek, a~DRC nie wykazało naruszeń reguł projektowych. Ponieważ
+wszystkie pady są przewlekane, ścieżka może zmienić warstwę na dowolnym
+padzie, więc przelotki nie są potrzebne. Łączna długość ścieżek wynosi
+178,16~mm.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_CKT_4_astar_2026-11-22}
+\caption{Płytka CKT~4 poprowadzona algorytmem A* bez sieci neuronowej.
+Źródło: opracowanie własne.}\label{rys:ckt4-astar}
+\end{figure}
+
+Algorytm A* poprowadził wszystkie dziesięć sieci (18 z~18~połączeń),
+a~DRC nie wykazało naruszeń reguł projektowych. Ścieżki wymagały
+14~przelotek, mimo że wariant EasyEDA obył się bez nich. Łączna długość
+ścieżek wynosi 206,98~mm, czyli o~16,2\% więcej niż w~wariancie EasyEDA.
+Trasowanie trwało 7,9~s, a~algorytm rozwinął 110\,236~węzłów.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_CKT_4_unet_2026-11-22}
+\caption{Płytka CKT~4 poprowadzona algorytmem Unet-A*. Źródło:
+opracowanie własne.}\label{rys:ckt4-unet}
+\end{figure}
+
+Algorytm Unet-A* poprowadził 17 z~18~połączeń. Niepoprowadzone pozostało
+połączenie tranzystora Q1 z~rezystorem R5, więc w~EasyEDA połączonych jest
+dziewięć z~dziesięciu sieci. Ścieżki wymagały tylko 3~przelotek, prawie
+pięciokrotnie mniej niż w~wariancie A*. Łączna długość ścieżek wynosi
+198,05~mm. Jest to o~4,3\% mniej niż w~wariancie A* i~o~11,2\% więcej niż
+w~wariancie EasyEDA, mimo braku jednego połączenia. Trasowanie trwało
+3,1~s wobec 7,9~s dla A*, a~liczba rozwiniętych węzłów spadła ze
+110\,236 do 44\,283, czyli o~60\%.
+
+\begin{table}[ht]
+\fcmtcaption{Parametry płytki CKT~4 w~badanych wariantach. Źródło:
+opracowanie własne.}\label{tab:wyniki-ckt4}
+\centering\footnotesize%
+\begin{tabular}{l r r r}
+\toprule
+Miara & EasyEDA & A* & Unet-A* \\
+\midrule
+Połączone sieci & 10/10 & 10/10 & 9/10 \\
+\midrule
+Długość ścieżek [mm] & 178,16 & 206,98 & 198,05 \\
+\midrule
+Liczba przelotek & 0 & 14 & 3 \\
+\midrule
+Naruszenia DRC & 0 & 0 & 1 \\
+\midrule
+Czas trasowania [s] & --- & 7,9 & 3,1 \\
+\midrule
+Rozwinięte węzły & --- & 110\,236 & 44\,283 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Płytka stabilizatora L7815}
+\label{sec:wyniki-l7815}
+
+Piąta płytka testowa, podobnie jak płytka PT4115, pochodzi z~projektu
+udostępnionego w~sekcji \emph{Modules} serwisu EasyEDA, opisanego jako
+L7815-regulator. Jest to układ zasilania ze stabilizatorem napięcia
+L7815, który zawiera wyłącznie elementy przewlekane (THT). Jest na niej
+7~elementów: stabilizator w~obudowie TO-220 (U1), cztery kondensatory
+(C1, C2, C4, C6) i~dwa złącza (P1, X1). Elementy mają łącznie 15~padów.
+Płytka ma wymiary $63 \times 42$~mm, a~więc jest największą z~badanych
+płytek. Projekt zawiera tylko trzy sieci, w~tym siedmiopinową sieć masy
+(GND), które dają łącznie 12~połączeń dwupinowych.
+
+Wyniki trasowania przedstawiono na
+rysunkach~\ref{rys:l7815-easyeda}--\ref{rys:l7815-unet}, a~ich parametry
+zestawiono w~tabeli~\ref{tab:wyniki-l7815}.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_L7815-regulator_2026-11-22}
+\caption{Płytka stabilizatora L7815 poprowadzona autorouterem EasyEDA.
+Źródło: opracowanie własne.}\label{rys:l7815-easyeda}
+\end{figure}
+
+Autorouter EasyEDA poprowadził wszystkie trzy sieci bez użycia
+przelotek, a~DRC nie wykazało naruszeń reguł projektowych. Ścieżki
+biegną głównie po warstwie górnej, odcinkami prostymi i~pod kątem 45°.
+Łączna długość ścieżek wynosi 199,07~mm.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_L7815-regulator_astar_2026-11-22}
+\caption{Płytka stabilizatora L7815 poprowadzona algorytmem A* bez sieci
+neuronowej. Źródło: opracowanie własne.}\label{rys:l7815-astar}
+\end{figure}
+
+Algorytm A* poprowadził wszystkie trzy sieci (12 z~12~połączeń), a~DRC
+nie wykazało naruszeń reguł projektowych. Ścieżki wymagały jednak
+20~przelotek. Większość z~nich leży na dwóch równoległych ścieżkach
+biegnących ukośnie od stabilizatora do złącza X1, które wielokrotnie
+zmieniają warstwę. Łączna długość ścieżek wynosi 248,35~mm, czyli
+o~24,8\% więcej niż w~wariancie EasyEDA. Trasowanie trwało 60,5~s,
+a~algorytm rozwinął 369\,211~węzłów. To najdłuższy czas trasowania
+wśród badanych płytek, co wynika z~dużej powierzchni płytki i~długich
+połączeń.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.8\textwidth]{figures/PCB_PCB_L7815-regulator_unet_2026-11-22}
+\caption{Płytka stabilizatora L7815 poprowadzona algorytmem Unet-A*.
+Źródło: opracowanie własne.}\label{rys:l7815-unet}
+\end{figure}
+
+Algorytm Unet-A* również poprowadził wszystkie trzy sieci, a~DRC nie
+wykazało naruszeń reguł projektowych. Ścieżki wymagały tylko jednej
+przelotki wobec 20 w~wariancie A*. Łączna długość ścieżek wynosi
+241,83~mm. Jest to o~2,6\% mniej niż w~wariancie A*, ale o~21,5\% więcej
+niż w~wariancie EasyEDA. Trasowanie trwało 7,7~s wobec 60,5~s dla A*,
+czyli prawie ośmiokrotnie krócej, a~liczba rozwiniętych węzłów spadła
+z~369\,211 do 112\,317, czyli o~70\%.
+
+\begin{table}[ht]
+\fcmtcaption{Parametry płytki stabilizatora L7815 w~badanych wariantach.
+Źródło: opracowanie własne.}\label{tab:wyniki-l7815}
+\centering\footnotesize%
+\begin{tabular}{l r r r}
+\toprule
+Miara & EasyEDA & A* & Unet-A* \\
+\midrule
+Połączone sieci & 3/3 & 3/3 & 3/3 \\
+\midrule
+Długość ścieżek [mm] & 199,07 & 248,35 & 241,83 \\
+\midrule
+Liczba przelotek & 0 & 20 & 1 \\
+\midrule
+Naruszenia DRC & 0 & 0 & 0 \\
+\midrule
+Czas trasowania [s] & --- & 60,5 & 7,7 \\
+\midrule
+Rozwinięte węzły & --- & 369\,211 & 112\,317 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Rozmieszczanie elementów}
+\label{sec:wyniki-rozmieszczanie}
+
+Wytrenowaną politykę RL\_PCB uruchomiono na wszystkich pięciu płytkach
+testowych. Dla każdej płytki porównano HPWL trzech rozmieszczeń:
+\begin{itemize}
+  \item rozmieszczenia z~projektu EasyEDA, stanowiącego punkt odniesienia,
+  \item stanu początkowego epizodu, czyli rozmieszczenia po losowym
+    przesunięciu i~obróceniu elementów przy rozpoczęciu epizodu, od którego
+    startuje polityka,
+  \item najlepszego rozmieszczenia znalezionego przez politykę.
+\end{itemize}
+Program RL\_PCB zapisuje rozmieszczenie tylko wtedy, gdy obniża ono
+najlepszą dotąd wartość HPWL, a~nakładanie się obrysów każdego elementu
+nie przekracza progu: poniżej 1\% (wynik bez nakładania), do 10\% albo do
+20\%. W~tabeli podano najlepszy wynik z~najniższego osiągniętego progu.
+
+HPWL wyznaczono według wzoru~\ref{eq:hpwl} skryptem
+\texttt{tools/hpwl.py}, który odczytuje pady bezpośrednio z~plików
+płytek w~formacie KiCad. Podano dwie wartości:
+dla wszystkich sieci oraz bez sieci zasilania, które polityka pomija
+i~które nie wchodzą do jej funkcji nagrody. Druga wartość jest zgodna
+z~HPWL raportowanym przez program RL\_PCB z~dokładnością do
+0,0002~mm, co potwierdza poprawność konwersji współrzędnych. Na płytce
+CKT~4 żadna sieć nie została rozpoznana jako sieć zasilania, ponieważ
+sieci zasilania mają nazwy pochodzące od złącza (V1\_1, V1\_2), dlatego
+obie wartości są równe.
+
+\begin{table}[ht]
+\fcmtcaption{HPWL rozmieszczeń płytek testowych [mm]. Źródło: opracowanie
+własne.}\label{tab:wyniki-hpwl}
+\centering\footnotesize%
+\begin{tabular}{l r r r r r r l}
+\toprule
+ & \multicolumn{3}{c}{Wszystkie sieci} & \multicolumn{3}{c}{Bez sieci zasilania} & \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Płytka & EasyEDA & Start & RL\_PCB & EasyEDA & Start & RL\_PCB & Nakładanie \\
+\midrule
+LED & 105,90 & 113,78 & 104,15 & 105,90 & 113,78 & 104,15 & $<1\%$ (krok 8) \\
+\midrule
+Przykładowa & 121,57 & 111,00 & 83,77 & 80,32 & 78,77 & 60,17 & $\le 10\%$ (krok 11) \\
+\midrule
+PT4115 & 171,47 & 118,21 & 116,99 & 92,99 & 74,20 & 53,47 & $<1$ (krok 200) \\
+\midrule
+CKT~4 & 186,56 & 168,23 & --- & 186,56 & 168,23 & --- & brak $\le 20\%$ \\
+\midrule
+L7815 & 157,03 & 162,29 & --- & 89,72 & 88,96 & --- & brak $\le 20\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rozmieszczenia wyznaczone przez politykę wczytano w~edytorze KiCad
+(rysunki~\ref{rys:led-rl}--\ref{rys:pt4115-rl}) i~oceniono ich
+dopuszczalność według miar z~tabeli~\ref{tab:miary-rl}.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.7\textwidth]{figures/led-rl}
+\caption{Płytka z~diodą LED rozmieszczona przez politykę RL\_PCB.
+Źródło: opracowanie własne.}\label{rys:led-rl}
+\end{figure}
+
+Na płytce z~diodą LED (rysunek~\ref{rys:led-rl}) polityka znalazła
+rozmieszczenie bez nakładania się elementów, a~HPWL spadło ze
+113,78~mm w~stanie początkowym do 104,15~mm, czyli o~1,7\% poniżej
+rozmieszczenia EasyEDA. Gniazdo baterii B1 zajmuje lewą część płytki,
+a~przycisk SW1, rezystor R1 i~dioda LED1 leżą obok siebie po prawej
+stronie. Elementy nie nachodzą na siebie i~mieszczą się w~obrysie
+płytki, więc rozmieszczenie jest dopuszczalne i~może być bezpośrednio
+trasowane. Płytka ma tylko cztery elementy, więc możliwości poprawy
+rozmieszczenia z~EasyEDA są niewielkie.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.7\textwidth]{figures/sample-rl}
+\caption{Płytka przykładowa EasyEDA rozmieszczona przez politykę
+RL\_PCB (najlepszy wynik z~nakładaniem do 10\%). Źródło: opracowanie
+własne.}\label{rys:sample-rl}
+\end{figure}
+
+Na płytce przykładowej (rysunek~\ref{rys:sample-rl}) polityka w~ciągu
+300~kroków nie znalazła rozmieszczenia bez nakładania. Najlepsze
+rozmieszczenie z~nakładaniem do 10\% ma HPWL o~31,1\% niższe niż
+w~EasyEDA, ale nie jest dopuszczalne, ponieważ pady tranzystorów Q1
+i~Q2 nachodzą na siebie. Przed dalszym projektowaniem wymagałoby ono
+ręcznej korekty położenia tranzystorów.
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.7\textwidth]{figures/pt4115-rl}
+\caption{Płytka modułu PT4115 rozmieszczona przez politykę RL\_PCB.
+Źródło: opracowanie własne.}\label{rys:pt4115-rl}
+\end{figure}
+
+Na płytce PT4115 (rysunek~\ref{rys:pt4115-rl}) HPWL spadło o~31,8\%
+względem EasyEDA dla wszystkich sieci i~o~42,5\% bez sieci zasilania.
+Program RL\_PCB zapisał ten wynik jako rozmieszczenie bez nakładania,
+jednak po wczytaniu w~KiCad okazało się ono niedopuszczalne. Elementy
+w~środkowej części płytki (cewka L1, układ U1, dioda D1 i~złącze J1) są
+ściśnięte tak, że wiele ich padów nachodzi na siebie. 
+
+Kondensator C2 jest połączony wyłącznie z~sieciami zasilania, więc
+polityka nie ma informacji, gdzie go umieścić. Znalazł się z~dala od
+pozostałych elementów i~wystaje o~ok.~1,1~mm poza prawą krawędź płytki,
+choć jako kondensator filtrujący zasilanie powinien leżeć blisko
+układu U1. Nic nie przyciąga go do pozostałych elementów, a~kara za
+wyjście poza obrys jest słaba, ponieważ program RL\_PCB traktuje obszar
+wokół płytki tak samo jak inne elementy, czyli tylko jako nakładanie.
+Epizod jest przerywany dopiero wtedy, gdy środek elementu znajdzie się
+poza płytką, a~element w~całości ją opuści.
+
+Na płytkach CKT~4 (200~kroków) i~L7815 (limit 300~kroków) w~żadnym
+kroku nakładanie się obrysów wszystkich elementów nie spadło do 20\%,
+więc program nie zapisał żadnego rozmieszczenia wyznaczonego przez
+politykę.
