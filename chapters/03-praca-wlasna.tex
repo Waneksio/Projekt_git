@@ -1,59 +1,10 @@
-\chapter{Rozwinięcie}
+\chapter{Obiekt oraz metodologia badań}
 \label{ch:rozwiniecie}
 
-W~rozdziale opisano przedmiot i~metodykę badań. Przedstawiono cel badań,
+W~rozdziale opisano przedmiot i~metodykę badań. Przedstawiono
 przebieg eksperymentu, sposób przygotowania danych uczących i~testowych,
 porównywane warianty trasowania i~rozmieszczania elementów oraz miary,
 według których je oceniano.
-
-\section{Cel badań}
-\label{sec:cel-badan}
-
-Badania obejmują dwa etapy projektowania płytki: trasowanie połączeń
-oraz poprzedzające je rozmieszczenie elementów. Dla każdego z~nich
-sformułowano osobne pytania badawcze.
-
-\subsection{Trasowanie}
-\label{sec:cel-trasowanie}
-
-Celem badań jest ocena, czy rozwiązanie Unet-Astar~\cite{Yin2023UnetAstar}
-wytrenowane wyłącznie na syntetycznych, losowo generowanych płytkach może
-skutecznie wspierać trasowanie rzeczywistych projektów PCB. Sformułowano
-następujące pytania badawcze:
-\begin{enumerate}
-  \item Czy predykcja sieci U-Net zmniejsza liczbę węzłów rozwijanych przez
-    algorytm A* na płytkach rzeczywistych, a~więc czy sieć uogólnia się poza
-    rozkład danych uczących?
-  \item Jak jakość trasowania uzyskanego algorytmem Unet-Astar (odsetek
-    połączonych sieci, długość ścieżek, liczba przelotek, liczba naruszeń reguł
-    projektowych) wypada na tle autoroutera wbudowanego w~EasyEDA?
-  \item Czy różnice w~geometrii ścieżek przekładają się na właściwości istotne
-    z~punktu widzenia kompatybilności elektromagnetycznej?
-\end{enumerate}
-
-\subsection{Rozmieszczanie elementów}
-\label{sec:cel-rozmieszczanie}
-
-Celem tej części badań jest ocena, czy polityka rozmieszczania elementów
-wytrenowana metodą RL\_PCB~\cite{Vassallo2024RLPCB} na syntetycznych
-płytkach daje poprawne i~użyteczne rozmieszczenie na płytkach rzeczywistych.
-Polityka uczona była na niewielkich, kwadratowych płytkach, a~płytki testowe
-różnią się od nich wymiarami, proporcjami boków oraz liczbą i~rozmiarem
-elementów. Sformułowano następujące pytania badawcze:
-\begin{enumerate}
-  \setcounter{enumi}{3}
-  \item Czy rozmieszczenie wyznaczone przez politykę jest dopuszczalne, tzn.
-    czy elementy nie nachodzą na siebie, zachowują wymagane odstępy
-    i~w~całości mieszczą się w~obrysie płytki?
-  \item Jak jakość rozmieszczenia, mierzona sumą półobwodów prostokątów
-    otaczających poszczególne sieci (HPWL, wzór~\ref{eq:hpwl}) oraz
-    powierzchnią prostokąta otaczającego wszystkie elementy, wypada na tle
-    rozmieszczenia wykonanego ręcznie przez projektanta?
-  \item Czy rozmieszczenie wyznaczone przez politykę ułatwia trasowanie, tzn.
-    jak zmieniają się odsetek połączonych sieci, długość ścieżek i~liczba
-    przelotek po poprowadzeniu płytki tym samym trasownikiem co
-    rozmieszczenie ręczne?
-\end{enumerate}
 
 \section{Przebieg badań}
 \label{sec:przebieg-badan}
@@ -174,7 +125,7 @@ reguły projektowe (odstęp izolacyjny, szerokość ścieżki, przelotki), kszta
 padów (\emph{padstack}), położenia pinów oraz listę sieci. EasyEDA zapisuje
 płytkę jako jeden komponent, którego piny mają współrzędne bezwzględne.
 Obroty elementów są uwzględnione bezpośrednio w~kształtach padów.
-Współrzędne zapisane są w~jednostkach EasyEDA równych 10~mil.
+Współrzędne zapisane są w~jednostkach EasyEDA równych 10~mil.~\footnote{1 mil to 0,001 cala.}
 
 Program Unet-Astar przelicza współrzędne na mile i~na potrzeby trasowania
 przenosi je na siatkę o~boku 8~mil (ok.~0{,}2~mm). Reguły projektowe są przy

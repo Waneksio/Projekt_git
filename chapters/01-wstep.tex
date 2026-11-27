@@ -17,9 +17,53 @@ projektów przestrzeganie zasad projektowania często można pominąć, a ewentu
 dużego nakładu czasowego, tak w przypadku większych projektów odgrywa ono jedną z kluczowych ról w prawidłowym
 funkcjonowaniu płytki i często oznacza godziny pracy fachowca. Co prawda platforma EasyEDA przygotowała dla
 użytkowników narzędzie do automatycznego rozmieszczania elementów na płytce, podziału na warstwy i wyznaczania
-ścieżek, jednak w praktyce, ze względu na jakość rozwiązań, nie korzysta się z niego.
+ścieżek, jednak w praktyce, ze względu na jakość rozwiązań, nie korzysta się z niego --- konieczność wprowadzania
+korekt czyni je nieefektywnym czasowo.
 
 Celem pracy jest przeprowadzenie badań nad skutecznością rozwiązań sztucznej inteligencji w tym właśnie zakresie.
+Badania obejmują dwa etapy projektowania płytki: trasowanie połączeń
+oraz poprzedzające je rozmieszczenie elementów. Dla każdego z~nich
+sformułowano osobne pytania badawcze.\\[4pt]
+\textbf{Trasowanie}
+\label{sec:cel-trasowanie}
+
+Celem badań jest ocena, czy rozwiązanie Unet-Astar~\cite{Yin2023UnetAstar}
+wytrenowane wyłącznie na syntetycznych, losowo generowanych płytkach może
+skutecznie wspierać trasowanie rzeczywistych projektów PCB. Sformułowano
+następujące pytania badawcze:
+\begin{enumerate}
+  \item Czy predykcja sieci U-Net zmniejsza liczbę węzłów rozwijanych przez
+    algorytm A* na płytkach rzeczywistych, a~więc czy sieć uogólnia się poza
+    rozkład danych uczących?
+  \item Jak jakość trasowania uzyskanego algorytmem Unet-Astar (odsetek
+    połączonych sieci, długość ścieżek, liczba przelotek, liczba naruszeń reguł
+    projektowych) wypada na tle autoroutera wbudowanego w~EasyEDA?
+  \item Czy różnice w~geometrii ścieżek przekładają się na właściwości istotne
+    z~punktu widzenia kompatybilności elektromagnetycznej?
+\end{enumerate}
+\textbf{Rozmieszczanie elementów}
+\label{sec:cel-rozmieszczanie}
+
+Celem tej części badań jest ocena, czy polityka rozmieszczania elementów
+wytrenowana metodą RL\_PCB~\cite{Vassallo2024RLPCB} na syntetycznych
+płytkach daje poprawne i~użyteczne rozmieszczenie na płytkach rzeczywistych.
+Polityka uczona była na niewielkich, kwadratowych płytkach, a~płytki testowe
+różnią się od nich wymiarami, proporcjami boków oraz liczbą i~rozmiarem
+elementów. Sformułowano następujące pytania badawcze:
+\begin{enumerate}
+  \setcounter{enumi}{3}
+  \item Czy rozmieszczenie wyznaczone przez politykę jest dopuszczalne, tzn.
+    czy elementy nie nachodzą na siebie, zachowują wymagane odstępy
+    i~w~całości mieszczą się w~obrysie płytki?
+  \item Jak jakość rozmieszczenia, mierzona sumą półobwodów prostokątów
+    otaczających poszczególne sieci (HPWL, wzór~\ref{eq:hpwl}) oraz
+    powierzchnią prostokąta otaczającego wszystkie elementy, wypada na tle
+    rozmieszczenia wykonanego ręcznie przez projektanta?
+  \item Czy rozmieszczenie wyznaczone przez politykę ułatwia trasowanie, tzn.
+    jak zmieniają się odsetek połączonych sieci, długość ścieżek i~liczba
+    przelotek po poprowadzeniu płytki tym samym trasownikiem co
+    rozmieszczenie ręczne?
+\end{enumerate}
 
 Struktura pracy jest następująca:
 \begin{itemize}

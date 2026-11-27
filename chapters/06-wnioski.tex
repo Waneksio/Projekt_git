@@ -1,6 +1,14 @@
 \chapter{Wnioski}
 \label{ch:wnioski}
 
+W~rozdziale omówiono wyniki przedstawione w~rozdziale~\ref{ch:wyniki}
+i~udzielono odpowiedzi na pytania badawcze postawione we wstępie.
+Wnioski podzielono na dwie części, dotyczące trasowania połączeń
+i~rozmieszczania elementów. W~każdej z~nich oceniono najpierw
+skuteczność badanego rozwiązania, następnie czas jego działania,
+a~na końcu wskazano możliwości kontynuowania badań i~aspekty, na które
+należałoby zwrócić szczególną uwagę.
+
 \section{Skuteczność trasowania}
 
 Na większości płytek trasowanie wyznaczone algorytmami \emph{A*}
@@ -65,10 +73,14 @@ Szczególną uwagę warto zwrócić na zwiększenie kary za załamania ścieżki
 i~zmiany warstwy. Warto też zbadać wpływ kolejności prowadzenia połączeń
 oraz możliwość ponownego prowadzenia połączeń, które zablokowały inne.
 
-W~dalszych badaniach przydatna może okazać się także walidacja wyników
-za pomocą symulacji pola elektromagnetycznego, dostępnej w~istniejących
-programach. Pozwoliłoby to rzetelniej ocenić wyznaczone ścieżki niż
-same miary geometryczne.
+W~pracy nie udało się odpowiedzieć na pytanie, czy różnice w~geometrii
+ścieżek przekładają się na właściwości istotne z~punktu widzenia
+kompatybilności elektromagnetycznej. Zestawione miary geometryczne, takie jak
+łączna długość ścieżek i~liczba przelotek, pozwalają ocenić te
+właściwości jedynie pośrednio. Dlatego w~dalszych badaniach przydatna
+może okazać się walidacja wyników za pomocą symulacji pola
+elektromagnetycznego, dostępnej w~istniejących programach. Pozwoliłoby
+to rzetelniej ocenić wyznaczone ścieżki niż same miary geometryczne.
 
 \section{Skuteczność rozmieszczania elementów}
 
@@ -83,6 +95,12 @@ poza obrys płytki. Na płytkach CKT~4 i~L7815 polityka nie wyznaczyła
 W~edytorach płytek nawet niewielkie nałożenie się padów lub
 niezachowanie minimalnego odstępu od krawędzi jest błędem DRC, który
 wyklucza płytkę z~produkcji.
+
+Choć wartości HPWL przemawiają na korzyść RL\_PCB, trudno na ich
+podstawie mówić o~jakości rozmieszczenia, skoro większość rozwiązań
+okazała się niedopuszczalna. Miara HPWL nie uwzględnia nakładania się
+elementów, a~niższa wartość wynikała w~dużej mierze właśnie z~tego, że
+elementy połączone wspólnymi sieciami nachodziły na siebie.
 
 Prawdopodobnych przyczyn jest kilka. Politykę wytrenowano na jednej
 płytce uczącej o~wymiarach $20 \times 20$~mm z~czterema małymi
@@ -104,6 +122,13 @@ Wyniki programu RL\_PCB nie mogą być przyjmowane bez sprawdzenia
 w~edytorze płytek. Skrypt oceniający zapisał rozmieszczenie płytki
 PT4115 jako wolne od nakładania, ponieważ w~ostatnim kroku epizodu
 sprawdzał tylko jeden element.
+
+Nie można też odpowiedzieć na pytanie, czy rozmieszczenie wyznaczone
+przez politykę ułatwia trasowanie. Płytek z~nachodzącymi na siebie
+elementami nie da się poprawnie poprowadzić, ponieważ naruszają one
+reguły projektowe już przed trasowaniem. Jedyne dopuszczalne
+rozmieszczenie, uzyskane dla płytki z~diodą LED, nie wystarczyłoby
+natomiast do sformułowania ogólnego wniosku.
 
 \section{Czas rozmieszczania elementów}
 

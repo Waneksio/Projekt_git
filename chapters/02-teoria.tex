@@ -1,22 +1,21 @@
 
 \chapter{Podstawy teoretyczne}
 
-W tej sekcji zawarte są definicje związane z problemem.
-
-Przedmiotem badań jest zastosowanie sztucznej inteligencji w~dwóch etapach
-projektowania PCB: rozmieszczaniu elementów (ang.~\emph{placement}) oraz
-trasowaniu połączeń (ang.~\emph{routing}). Rozmieszczanie badane jest
-z~użyciem metody uczenia ze wzmocnieniem (ang.~\emph{reinforcement learning},
-RL) opracowanej przez L.~Vassallo i~J.~Bajadę~\cite{Vassallo2024RLPCB,Vassallo_RLPCB_GitHub},
-a~trasowanie --- z~użyciem metody Unet-Astar opracowanej przez S.~Yina
-i~współautorów~\cite{Yin2023UnetAstar,Firesuiry_UnetAstar_GitHub}.
+W~rozdziale przedstawiono podstawy teoretyczne potrzebne do zrozumienia
+dalszej części pracy. Omówiono budowę płytki drukowanej oraz dwa
+zagadnienia będące przedmiotem badań: trasowanie połączeń
+i~rozmieszczanie elementów, a~także reguły projektowe, które ograniczają
+oba te etapy. W~dalszej części opisano algorytmy wyszukiwania ścieżek
+A* i~Lee, konwolucyjne sieci neuronowe, w~tym architekturę U-Net
+i~rozwiązanie Unet-Astar, oraz uczenie ze wzmocnieniem, na którym opiera
+się metoda RL\_PCB.
 
 \section{Budowa PCB}
 
 Płytka drukowana (ang.~\emph{printed circuit board}, PCB) to produkt powstały
 w wyniku selektywnego wytrawiania zbędnej miedzi z powierzchni izolacyjnych
 podłoży pokrytych miedzią, tworzący wymaganą mozaikę połączeń, która jest
-metalizowana i laminowana~\cite[pkt 3.2.53]{ECSS_Q_ST_70_12C_Rev1}.
+metalizowana i laminowana~\cite{ECSS_Q_ST_70_12C_Rev1}.
 Przekrój płytki dwuwarstwowej przedstawiono na rysunku~\ref{rys:przekroj-pcb}.
 \emph{WARSTWA TOP} oraz \emph{WARSTWA BOTTOM} oznaczają międziane ścieżki.
 Widać też przelotki, łączące górną i~dolną warstwę. Warstwy przedzielone
@@ -27,33 +26,34 @@ tworzą sieci, określające, które pady mają być ze sobą połączone. Model
 tworzą footprinty wraz z padami oraz ścieżki, przelotki i wypełnione obszary
 miedzi~\cite{KiCad_PCBEditor_BasicConcepts}.
 
-Płytki jedno- i dwustronne są najczęściej wykorzystywane w urządzeniach
-codziennego użytku~\cite{Romik_TSPCB_ObwodDrukowany} i to one będą przedmiotem
-badań. Liczba warstw miedzi jest ograniczona także przez oprogramowanie
-projektowe; KiCad obsługuje ich do~32~\cite{KiCad_PCBEditor_BasicConcepts}.
+Płytki jedno- i~dwuwarstwowe są najczęściej wykorzystywane w~urządzeniach
+codziennego użytku~\cite{Romik_TSPCB_ObwodDrukowany} i~to one będą przedmiotem
+badań. Liczba warstw oznacza na ilu płaszczyznach rozłożone są miedziane ścieżki.
+Liczba ta ograniczona jest przez czynniki technologiczne, takie jak łączenie warstw
+wewnętrznych za pomocą przelotek, a~także przez samo oprogramowanie projektowe; 
+KiCad obsługuje ich do~32~\cite{KiCad_PCBEditor_BasicConcepts}, a EasyEDA do~34.
 
 \begin{figure}[H]
 \centering\includegraphics[width=\textwidth]{figures/Bez-tytulu}
 \caption{Przekrój płytki PCB. Źródło:~\cite{Romik_TSPCB_ObwodDrukowany}.}\label{rys:przekroj-pcb}
 \end{figure}
-
-\subsection{Elementy PCB}
+\textbf{Elementy PCB}
 
 \begin{description}
   \item[Warstwa przewodząca] (ang.~\emph{conductive layer}) --- elementy
     przewodzące płytki leżące na tej samej warstwie, np.~ścieżki, płaszczyzny
-    lub pady~\cite[pkt 3.2.18]{ECSS_Q_ST_70_12C_Rev1}.
+    lub pady~\cite{ECSS_Q_ST_70_12C_Rev1}.
   \item[Footprint] --- reprezentacja elementu elektronicznego na płytce wraz
     z jego padami~\cite{KiCad_PCBEditor_BasicConcepts}.
-  \item[Pad] (pole lutownicze, ang.~\emph{soldering pad}) --- element
+  \item[Pad] --- element
     przewodzący przeznaczony do przylutowania komponentu do
-    płytki~\cite[pkt 3.2.62]{ECSS_Q_ST_70_12C_Rev1}.
+    płytki~\cite{ECSS_Q_ST_70_12C_Rev1}.
   \item[Sieć] (ang.~\emph{net}) --- określenie, w jaki sposób pady mają być ze
     sobą połączone~\cite{KiCad_PCBEditor_BasicConcepts}.
   \item[Ścieżka] (ang.~\emph{track}) --- element przewodzący prowadzący
-    połączenie elektryczne między padami~\cite[pkt 3.2.66]{ECSS_Q_ST_70_12C_Rev1}.
+    połączenie elektryczne między padami~\cite{ECSS_Q_ST_70_12C_Rev1}.
   \item[Przelotka] (ang.~\emph{via}) --- metalizowany otwór służący wyłącznie
-    do łączenia warstw~\cite[pkt 3.2.67]{ECSS_Q_ST_70_12C_Rev1}.
+    do łączenia warstw~\cite{ECSS_Q_ST_70_12C_Rev1}.
   \item[Wypełniony obszar miedzi] (ang.~\emph{filled zone}) --- obszar miedzi
     tworzący, obok ścieżek i przelotek, połączenia między padami danej
     sieci~\cite{KiCad_PCBEditor_BasicConcepts}.
@@ -69,8 +69,8 @@ do najbardziej skomplikowanych --- ocena kompatybilności elektromagnetycznej (a
 na podstawie symulacji pola elektromagnetycznego.
 
 \begin{description}
-  \item[Dane wejściowe] --- obrys płytki, liczba warstw, rozmieszczone
-    footprinty, sieci oraz reguły projektowe.
+  \item[Dane wejściowe] --- obrys płytki, liczba warstw, lokalizacja padów,
+    sieci oraz reguły projektowe.
   \item[Wynik] --- ścieżki i przelotki łączące pady każdej sieci.
   \item[Ograniczenia] --- brak zwarć między różnymi sieciami, zachowanie
     minimalnych odstępów i szerokości ścieżek.
@@ -94,7 +94,7 @@ w bloki funkcjonalne~\cite{Gora_ProjektowaniePCB}.
   \item[Ograniczenia] --- elementy nie nachodzą na siebie i~mieszczą się
     w~obrysie płytki, z~zachowaniem minimalnych odstępów.
   \item[Kryteria oceny] --- szacowana długość połączeń, trasowalność,
-    kryteria elektryczne, cieplne i~montażowe.
+    kryteria elektryczne oraz cieplne.
 \end{description}
 
 Ocena rozmieszczenia jest trudniejsza niż ocena trasowania, ponieważ
@@ -139,8 +139,8 @@ Kryteria te zależą od konkretnego układu i~zwykle ocenia je projektant.
 Programy do projektowania płytek takie jak EasyEDA lub KiCad posiadają wbudowane narzędzie do weryfikacji,
 czy określone wymagania dotyczące płytki zostały spełnione oraz czy wszystkie pady zostały połączone zgodnie z
 netlistami. Narzędzie to nosi nazwę DRC (ang. Design Rule Checker). W przypadku KiCada narzędzie automatycznie
-zapobiega łamaniu niektórych reguł podczas trasowania ścieżek. Nadal jednak istnieje wiele regół których w ten
-sposób nie da się wykluczyć, gotowy schemat oraz przygotowaną płytkę należy zatem walidować.~\cite{KiCad_PCBEditor_DRC}:
+zapobiega łamaniu niektórych reguł podczas trasowania ścieżek. Nadal jednak istnieje wiele reguł których w ten
+sposób nie da się wykluczyć, gotowy schemat oraz przygotowaną płytkę należy zatem walidować~\cite{KiCad_PCBEditor_DRC}:
 
 \begin{description}
   \item[Minimalny odstęp izolacyjny] (ang.~\emph{clearance}) --- najmniejsza
@@ -205,12 +205,9 @@ Trasowanie w~ocenie & --- & zewnętrzny program, z~pominięciem sieci zasilania 
 \end{table}
 
 \section{Algorytm A*}
-A* jest heurystycznym algorytmem służącym do znajdowanias najkrótszej ścieżki w grafie.
-Jest to algorytm zupełny i optymalny, a zatem zawsze da się znaleźć przy jego pomocy
-najlepsze rozwiązanie. Metoda gwarantuje, że każdy punkt zostanie odwiedzony dzięki zorganizowanemu
-modelowi pamięciowemu.
-
-Działanie oparte jest na minimalizacji funkcji celu $f(x)$, zdefiniowanej jako suma funkcjo kosztu
+A* jest heurystycznym algorytmem służącym do znajdowania najkrótszej ścieżki w grafie.
+Jego Działanie oparte jest na minimalizacji funkcji celu $f(x)$, zdefiniowanej jako 
+suma funkcji kosztu
 $g(x)$ oraz funkcji heurystycznej $h(x)$:
 \begin{equation}
   f(x) = g(x) + h(x)
@@ -228,21 +225,21 @@ do wierzchołka docelowego.
 
 warunki prawidłowości funkcji heurystycznej:
 
-warunek dopuszczalności
-\begin{equation}
-  g(x) + h(x) \le g(x_t),
-  \label{eq:astar-dopuszczalnosc}
-\end{equation}
-gdzie $x_t$ oznacza punkt końcowy.
-
-warunek monotoniczności
-\begin{equation}
-  g(x_j) + h(x_j) \ge g(x_i) + h(x_i),
-  \label{eq:astar-monotonicznosc}
-\end{equation}
-gdzie $j > i$.
-
-\subsection{Adaptacja algorytmu A* w~metodzie Unet-Astar}
+\begin{itemize}
+  \item warunek dopuszczalności
+    \begin{equation}
+      g(x) + h(x) \le g(x_t),
+      \label{eq:astar-dopuszczalnosc}
+    \end{equation}
+    gdzie $x_t$ oznacza punkt końcowy.
+  \item warunek monotoniczności
+    \begin{equation}
+      g(x_j) + h(x_j) \ge g(x_i) + h(x_i),
+      \label{eq:astar-monotonicznosc}
+    \end{equation}
+  gdzie $j > i$.
+\end{itemize}
+\textbf{Adaptacja algorytmu A* w~metodzie Unet-Astar}
 \label{sec:astar-unet}
 
 Algorytm trasowania w~metodzie Unet-Astar opiera się na algorytmie A*
@@ -285,7 +282,7 @@ uczących.
 
 Trasowanie całej płytki przebiega w~następujących krokach~\cite{Yin2023UnetAstar}:
 \begin{enumerate}
-  \item Sieci wielopinowe dzieli się na połączenia dwupinowe za pomocą
+  \item Sieci obejmujące 3 lub więcej pinów dzieli się na połączenia dwupinowe za pomocą
     algorytmu drzewa Steinera.
   \item Połączenia dwupinowe szereguje się według długości odcinka łączącego
     ich końce, od najkrótszego do najdłuższego.
@@ -368,16 +365,16 @@ składa się z~trzech rodzajów warstw: konwolucyjnych, łączących
 
 
 \section{U-net}
-- Rodzaj sieci konwolucyjnej, w skrócie: konwolucja, pooling, segmentacja obrazu 
+Rodzaj sieci konwolucyjnej, w skrócie: konwolucja, pooling, segmentacja obrazu 
 (klasyfikacja każdego pixela).
-- Część kodująca zmiejsza obraz i zbiera kontekst, a część dekodująca odtwarza rozdzielczość.
-- Połączenia pomijające (skip connections) przekazują szczegóły przestrzenne z kodera do dekodera.
+Część kodująca zmiejsza obraz i zbiera kontekst, a część dekodująca odtwarza rozdzielczość.
+Połączenia pomijające (skip connections) przekazują szczegóły przestrzenne z kodera do dekodera.
 
 \section{Deeper U-Net i Unet-Astar}
-- Pomysł z Artykułu: sieć wskazuje obszary rekomendowane, a głębsza struktura daje więcej informacji kontekstowej.
-- Architektura w kodzie: wejście $256 \times 256$ z 3 kanałami, 8 redukcji rozdzielczości aż do $1 \times 1$, warstwa w pełni połączona
+Pomysł z Artykułu: sieć wskazuje obszary rekomendowane, a głębsza struktura daje więcej informacji kontekstowej.
+Architektura w kodzie: wejście $256 \times 256$ z 3 kanałami, 8 redukcji rozdzielczości aż do $1 \times 1$, warstwa w pełni połączona
 w środku i 2 klasy na wyjściu. Klasyczny U-Net ma 4 redukcje.
-- Połączenie z A*: sieć nie zastępuje A*, tylko zmienia kolejność odwiedzania węzłów
+Połączenie z A*: sieć nie zastępuje A*, tylko zmienia kolejność odwiedzania węzłów
 
 \begin{equation}
   f'(n) = \bigl(f(n) - a \cdot s(n)\bigr) \cdot \bigl(1 - b \cdot s(n)\bigr),
@@ -390,7 +387,7 @@ z~artykułu, przy $a = P_{\mathrm{lin}}$.
 \section{Reinforcement Learning}
 
 Uczenie ze wzmocnieniem (ang.~\emph{reinforcement learning}, RL) jest
-rodzajem uczenia maszynowego, w~którym agent (regulator) zdobywa wiedzę
+paradygmatem uczenia maszynowego, w~którym agent (regulator) zdobywa wiedzę
 o~obiekcie (procesie, środowisku) metodą prób i~błędów, wchodząc z~nim
 w~interakcję. W~każdym kroku~$k$ agent obserwuje stan obiektu~$x_k$,
 wykonuje akcję~$u_k$ i~obserwuje jej skutek, czyli kolejny stan~$x_{k+1}$.
@@ -512,9 +509,8 @@ akcjach, co przy akcjach ciągłych jest osobnym zadaniem optymalizacji
 wykonywanym w~każdym kroku. Z~tego powodu przy akcjach ciągłych, takich jak
 położenie i~obrót elementu na płytce, stosuje się metody aktor--krytyk.
 W~tych metodach osobna sieć (aktor) bezpośrednio wyznacza akcję, a~Q-funkcja
-(krytyk) służy do jej oceny.
-
-\subsection{Algorytm TD3}
+(krytyk) służy do jej oceny.\\[4pt]
+\textbf{Algorytm TD3}
 \label{sec:td3}
 
 TD3 (ang.~\emph{Twin Delayed Deep Deterministic Policy Gradient}) jest
@@ -551,9 +547,8 @@ Sieci docelowe są powoli przesuwane w~stronę sieci uczonych
 (np.\ $\theta' \leftarrow \tau\theta + (1-\tau)\theta'$ dla małego~$\tau$).
 Przejścia $(x_k, u_k, r_{k+1}, x_{k+1})$ zapisywane są w~buforze powtórek
 (ang.~\emph{replay buffer}), z~którego losuje się paczki do uczenia.
-Eksplorację zapewnia szum gaussowski dodawany do akcji aktora.
-
-\subsection{Adaptacja uczenia ze wzmocnieniem w~metodzie RL\_PCB}
+Eksplorację zapewnia szum gaussowski dodawany do akcji aktora. \\[4pt]
+\textbf{Adaptacja uczenia ze wzmocnieniem w~metodzie RL\_PCB}
 \label{sec:rl-pcb}
 
 W~metodzie RL\_PCB rozmieszczanie elementów sformułowano jako proces

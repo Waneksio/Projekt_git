@@ -1,6 +1,16 @@
 \chapter{Wyniki}
 \label{ch:wyniki}
 
+W~rozdziale przedstawiono wyniki eksperymentów. Sekcje
+\ref{sec:wyniki-led}--\ref{sec:wyniki-l7815} dotyczą trasowania
+połączeń. Dla każdej płytki testowej pokazano ścieżki wyznaczone
+w~trzech badanych wariantach, a~ich parametry zestawiono w~tabeli,
+przyjmując za punkt odniesienia wynik autoroutera EasyEDA.
+W~sekcji~\ref{sec:wyniki-rozmieszczanie} zestawiono wartości HPWL
+rozmieszczeń wyznaczonych programem RL\_PCB dla wszystkich płytek,
+a~następnie omówiono rozmieszczenia, które program zapisał, pod kątem
+ich dopuszczalności. Wnioski z~wyników sformułowano w~rozdziale~\ref{ch:wnioski}.
+
 \section{Płytka z~diodą LED}
 \label{sec:wyniki-led}
 
@@ -441,8 +451,8 @@ najlepszą dotąd wartość HPWL, a~nakładanie się obrysów każdego elementu
 nie przekracza progu: poniżej 1\% (wynik bez nakładania), do 10\% albo do
 20\%. W~tabeli podano najlepszy wynik z~najniższego osiągniętego progu.
 
-HPWL wyznaczono według wzoru~\ref{eq:hpwl} skryptem
-\texttt{tools/hpwl.py}, który odczytuje pady bezpośrednio z~plików
+HPWL wyznaczono według wzoru~\ref{eq:hpwl} przygotowanym do tego skryptem, 
+który odczytuje pady bezpośrednio z~plików
 płytek w~formacie KiCad. Podano dwie wartości:
 dla wszystkich sieci oraz bez sieci zasilania, które polityka pomija
 i~które nie wchodzą do jej funkcji nagrody. Druga wartość jest zgodna
